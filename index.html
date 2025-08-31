@@ -6,80 +6,149 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Merchant Solutions Finder</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preload" href="/data/solutions.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="data/solutions.json" as="fetch" crossorigin="anonymous">
   <style>
-    /* Optional tiny polish to match “app” feel */
-    .card { transition: transform .12s ease, box-shadow .12s ease; }
-    .card:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,.12); }
-    .chip { border: 1px solid rgba(255,255,255,.15) }
-    .fade-in { animation: fade .25s ease; } @keyframes fade { from{opacity:0} to{opacity:1} }
-    .modal-open { overflow: hidden; }
+    html, body { height: 100%; }
+    button, a { touch-action: manipulation; }
+    .scroll-lock { overflow: hidden; height: 100%; }
+    .modal-scroll { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
-<body class="min-h-screen bg-neutral-900 text-neutral-100">
-  <div class="max-w-5xl mx-auto px-4 py-6">
-    <!-- Header -->
-    <header class="mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold">Merchant Services Solutions</h1>
-      <p class="text-neutral-300">Pick a business type → select needs → view best-fit solutions.</p>
+<body class="min-h-screen bg-slate-900 font-sans text-slate-100">
+  <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
+    <!-- Header (exact look from your original) -->
+    <header class="mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm">
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-3 md:gap-4">
+          <img src="https://static.wixstatic.com/media/e80bbd_a8148979599e4221be758a561140d67a~mv2.png"
+               alt="SignaPay Southeast"
+               class="h-12 w-auto object-contain sm:h-14 md:h-16"/>
+          <div class="flex-1 min-w-0">
+            <h1 class="truncate text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+              Merchant Solutions Finder
+            </h1>
+            <p class="text-xs text-blue-100 sm:text-sm">Helping you find the right fit</p>
+          </div>
+        </div>
+        <div class="flex md:self-start">
+          <button id="resetBtn" type="button"
+                  class="rounded-full bg-white/10 px-3 py-1 text-xs hover:bg-white/20">
+            Reset
+          </button>
+        </div>
+      </div>
     </header>
 
     <!-- Stepper -->
-    <nav id="stepper" class="flex items-center gap-2 text-sm mb-4">
-      <div class="px-3 py-1 rounded-full bg-emerald-600/20 border border-emerald-600/30" data-step="1">1. Business Type</div>
-      <div class="px-3 py-1 rounded-full bg-neutral-800 border border-neutral-700" data-step="2">2. Needs</div>
-      <div class="px-3 py-1 rounded-full bg-neutral-800 border border-neutral-700" data-step="3">3. Solutions</div>
-      <button id="resetBtn" class="ml-auto text-xs px-3 py-1 rounded bg-neutral-800 border border-neutral-700 hover:bg-neutral-700">Reset</button>
+    <nav class="mb-6 grid grid-cols-3 gap-2 text-[11px] sm:text-xs" id="stepper">
+      <div class="rounded-xl border px-3 py-2">1. Business type</div>
+      <div class="rounded-xl border px-3 py-2">2. Needs</div>
+      <div class="rounded-xl border px-3 py-2">3. Solutions</div>
     </nav>
 
     <!-- Step 1 -->
-    <section id="step1" class="fade-in">
-      <h2 class="text-lg font-semibold mb-2">What type of business are you working with today?</h2>
-      <div id="categoryWrap" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
-      <div class="mt-4">
-        <button id="toStep2" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40" disabled>Next</button>
-      </div>
-    </section>
+    <section id="step1" class="grid grid-cols-1 gap-3 md:grid-cols-2"></section>
 
     <!-- Step 2 -->
-    <section id="step2" class="hidden fade-in">
-      <h2 class="text-lg font-semibold mb-2">Select all that apply</h2>
-      <div id="featuresWrap" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-      <div class="mt-4 flex gap-2">
-        <button id="backTo1" class="px-4 py-2 rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700">Back</button>
-        <button id="toStep3" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500">See Solutions</button>
+    <section id="step2" class="hidden">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-100" id="needsTitle">What does this need?</h2>
+        <div class="flex gap-2">
+          <button id="selectAll" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Select all</button>
+          <button id="clearAll"  type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Clear</button>
+        </div>
+      </div>
+      <div id="needsGrid" class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"></div>
+      <div class="mt-6 flex justify-end gap-2">
+        <button id="backTo1" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm hover:bg-slate-700">Back</button>
+        <button id="toStep3" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">See solutions</button>
       </div>
     </section>
 
     <!-- Step 3 -->
-    <section id="step3" class="hidden fade-in">
-      <div class="flex items-end justify-between gap-3 mb-2">
-        <div>
-          <h2 class="text-lg font-semibold">Solutions</h2>
-          <p id="selectionSummary" class="text-neutral-300 text-sm"></p>
-        </div>
-        <button id="backTo2" class="px-3 py-1 rounded border border-neutral-700 bg-neutral-800 hover:bg-neutral-700">Change Needs</button>
+    <section id="step3" class="hidden">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-100">Recommended solutions</h2>
+        <button id="adjustNeeds" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Adjust needs</button>
       </div>
-      <div id="resultsWrap" class="grid sm:grid-cols-2 gap-3"></div>
+      <div id="solutionsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
     </section>
-  </div>
 
-  <!-- Modal -->
-  <div id="modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/70" data-close="true"></div>
-    <div class="relative max-w-2xl mx-auto mt-10 mb-16 bg-neutral-900 border border-neutral-700 rounded-xl overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
-        <h3 id="modalTitle" class="text-xl font-semibold"></h3>
-        <button id="modalClose" class="px-2 py-1 rounded border border-neutral-700 hover:bg-neutral-800">✕</button>
-      </div>
-      <div id="modalBody" class="p-4 space-y-4 text-sm"></div>
-      <div class="px-4 py-3 border-t border-neutral-700 flex gap-2">
-        <a id="modalProductLink" target="_blank" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-sm">Product Page</a>
-        <a id="modalPaperLink" target="_blank" class="px-3 py-2 rounded border border-neutral-600 hover:bg-neutral-800 text-sm">Paperwork</a>
+    <!-- Modal (same structure & styles as original) -->
+    <div id="modal" class="fixed inset-0 z-50 hidden items-end md:items-center md:justify-center" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 bg-slate-900/70" id="modalBackdrop" tabindex="-1"></div>
+      <div class="relative w-full max-w-3xl rounded-t-3xl bg-slate-900 p-6 shadow-2xl ring-1 ring-slate-700 md:rounded-3xl max-h-[85vh] overflow-y-auto modal-scroll">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-100" id="modalTitle"></h3>
+            <p class="text-sm text-slate-400">Comprehensive analysis</p>
+          </div>
+          <button id="modalClose" type="button" class="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-100 ring-1 ring-slate-700 hover:bg-slate-700">Close</button>
+        </div>
+
+        <div class="mb-4 flex flex-wrap gap-2" id="modalLinks"></div>
+
+        <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="rounded-2xl border border-green-900 bg-green-900/20 p-4">
+            <h4 class="mb-2 text-sm font-semibold text-green-300">Matches your selected needs</h4>
+            <ul id="modalMatches" class="list-inside list-disc text-sm text-green-200"></ul>
+          </div>
+          <div class="rounded-2xl border border-red-900 bg-red-900/20 p-4">
+            <h4 class="mb-2 text-sm font-semibold text-red-300">Not covered</h4>
+            <ul id="modalMisses" class="list-inside list-disc text-sm text-red-200"></ul>
+          </div>
+        </div>
+
+        <!-- Terminal detail blocks -->
+        <div id="terminalDetails" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
+          <h4 class="mb-2 text-sm font-semibold text-slate-200">Available SignaPay terminal models</h4>
+          <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <li class="rounded-lg border border-slate-700 p-3 text-sm">
+              <div class="font-medium">Valor VL100 / VL100 Pro</div>
+              <div class="text-xs text-slate-400">Countertop · EMV, NFC, Wi-Fi/Ethernet</div>
+              <a href="https://valorpaytech.com/what-we-do/hardware-products/countertop-pos/vl100-pro/" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">Official page ↗</a>
+            </li>
+            <li class="rounded-lg border border-slate-700 p-3 text-sm">
+              <div class="font-medium">Dejavoo QD4</div>
+              <div class="text-xs text-slate-400">Android countertop · EMV, NFC, Ethernet/Wi-Fi</div>
+              <a href="https://dejavoo.io/products/qd-terminals-family/qd4/" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">Official page ↗</a>
+            </li>
+            <li class="rounded-lg border border-slate-700 p-3 text-sm">
+              <div class="font-medium">PAX A80</div>
+              <div class="text-xs text-slate-400">Android countertop · EMV, NFC, Ethernet/Wi-Fi</div>
+              <a href="https://www.paxtechnology.com/a80" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">Official page ↗</a>
+            </li>
+            <li class="rounded-lg border border-slate-700 p-3 text-sm">
+              <div class="font-medium">Dejavoo P3 (Wireless)</div>
+              <div class="text-xs text-slate-400">Handheld LTE/Wi-Fi · EMV, NFC, built-in printer</div>
+              <a href="https://dejavoo.io/products/p-terminals-family/p3/" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">Official page ↗</a>
+            </li>
+          </ul>
+        </div>
+
+        <div id="shift4Details" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
+          <h4 class="mb-2 text-sm font-semibold text-slate-200">Shift4 desktop terminals</h4>
+          <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
+            <li class="rounded-lg border border-slate-700 p-3 text-sm">
+              <div class="font-medium">Countertop EMV/NFC terminals</div>
+              <div class="text-xs text-slate-400">Secure EMV chip, PIN, contactless, receipt printing</div>
+              <a href="https://www.shift4network.com/credit-card-terminals/" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">Shift4 terminals ↗</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="mt-4" id="allFeaturesBlock">
+          <h4 class="mb-2 text-sm font-semibold text-slate-200">All features</h4>
+          <div id="allFeatures" class="flex flex-wrap gap-2"></div>
+        </div>
       </div>
     </div>
+
+    <footer class="mt-10 text-center text-xs text-slate-400">
+      Clover, SkyTab, SignaPay, and Shift4 data provided · Links go to official sites
+    </footer>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

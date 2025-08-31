@@ -50,18 +50,17 @@
       "name":"Clover POS",
       "category":"Restaurant",
       "tags":["tips","table_service","counter_service","reservations","online_ordering","inventory_mgmt","loyalty","gift_cards","cust_display","employee_mgmt","analytics","mobile_pay","payroll","app_market","pci"],
-      "summary":"Customizable all-in-one POS system with hardware options, app marketplace, and robust tools.",
+      "summary":"Customizable all-in-one POS system with hardware options, app marketplace, and robust tools for restaurants.",
       "details":["Tableside or counter workflows","App marketplace","Hardware options"],
-      "links":{"product":"https://www.clover.com","paperwork":"https://www.zoho.com"},
-      "feature_badges": ["Restaurant"]
+      "links":{"product":"https://www.clover.com","paperwork":"https://www.zoho.com"}
     },
     {
       "id":"skytab",
       "name":"SkyTab POS",
       "category":"Restaurant",
       "tags":["tips","table_service","reservations","online_ordering","qr_code","kitchen_printer","inventory_mgmt","loyalty","gift_cards","cust_display","labor_mgmt","analytics","pay_at_table","site_builder","pci"],
-      "summary":"Modern restaurant POS with online ordering, reservations, QR payments, pay-at-table.",
-      "details":["KDS","Menu mgmt","Online ordering"],
+      "summary":"Modern restaurant POS with built-in online ordering, reservations, QR code payments, and pay-at-the-table.",
+      "details":["KDS","Menu management","Online ordering"],
       "links":{"product":"https://www.skytab.com","paperwork":"https://www.zoho.com"}
     },
     {
@@ -69,7 +68,7 @@
       "name":"SignaPay SE Desktop Terminals",
       "category":"Restaurant",
       "tags":["counter_service","mobile_pay","emv","contactless","wifi","terminal_simple","receipt_print"],
-      "summary":"Countertop and wireless terminals (Valor 100, Dejavoo QD4, PAX A80, Dejavoo P3).",
+      "summary":"Countertop and wireless credit card terminals (Valor 100, Dejavoo QD4, PAX A80, Dejavoo P3) for secure restaurant payments.",
       "details":["Secure EMV/NFC","Simple operation"],
       "links":{"product":"https://www.signapayse.com","paperwork":"https://www.zoho.com"},
       "special_block":"terminalDetails"
@@ -79,17 +78,36 @@
       "name":"Shift4 Desktop Terminals",
       "category":"Restaurant",
       "tags":["counter_service","emv","contactless","pci","receipt_print","terminal_simple"],
-      "summary":"Secure EMV/NFC countertop terminals.",
+      "summary":"Countertop payment terminals from Shift4 offering secure EMV, NFC contactless, and reliable processing for restaurants.",
       "links":{"product":"https://www.shift4network.com/credit-card-terminals/","paperwork":"https://www.zoho.com"},
       "special_block":"shift4Details"
     },
+
     {
       "id":"clover-retail",
       "name":"Clover POS",
       "category":"Retail",
       "tags":["inventory","barcode","cust_display_r","discounts","po","gift_cards_r","loyalty_r","cash_drawer","analytics_r","pin_debit","dual_pricing","pci_r"],
-      "summary":"Retail POS with inventory, barcodes, loyalty, integrated payments.",
+      "summary":"Clover POS for retail provides inventory management, barcode scanning, loyalty, and integrated payments for stores.",
       "links":{"product":"https://www.clover.com","paperwork":"https://www.zoho.com"}
+    },
+    {
+      "id":"signapay-retail-terminals",
+      "name":"SignaPay SE Desktop Terminals",
+      "category":"Retail",
+      "tags":["emv","contactless","receipt_print","terminal_simple","pin_debit","dual_pricing"],
+      "summary":"Secure countertop and wireless payment terminals for retail stores supporting EMV, NFC, and simple card acceptance.",
+      "links":{"product":"https://www.signapayse.com","paperwork":"https://www.zoho.com"},
+      "special_block":"terminalDetails"
+    },
+    {
+      "id":"shift4-retail-terminals",
+      "name":"Shift4 Desktop Terminals",
+      "category":"Retail",
+      "tags":["emv","contactless","pci_r","receipt_print","terminal_simple","pin_debit"],
+      "summary":"Shift4 retail terminals provide reliable card acceptance with EMV, contactless payments, and PCI compliant processing.",
+      "links":{"product":"https://www.shift4network.com/credit-card-terminals/","paperwork":"https://www.zoho.com"},
+      "special_block":"shift4Details"
     }
   ]
 }

@@ -1,293 +1,262 @@
-/* Merchant Solutions Finder (Data-Driven)
-   - Loads /data/solutions.json
-   - Step 1: choose category
-   - Step 2: choose needs (feature checkboxes)
-   - Step 3: scored solutions, modal with matches/misses
-   - Keeps special blocks for terminal details
-*/
+// app.js — loads data/solutions.json and renders your original UI/flow (vanilla JS)
 
-const DATA_URL = "data/solutions.json";
+const DATA_URL = "data/solutions.json"; // relative path for GitHub Pages project sites
 
 let DATA = null;
-let state = {
-  category: null,
-  selected: new Set(),
-};
 
-// DOM
-const stepper = document.getElementById("stepper");
-const step1 = document.getElementById("step1");
-const step2 = document.getElementById("step2");
-const step3 = document.getElementById("step3");
-const categoryWrap = document.getElementById("categoryWrap");
-const featuresWrap = document.getElementById("featuresWrap");
-const resultsWrap = document.getElementById("resultsWrap");
-const selectionSummary = document.getElementById("selectionSummary");
+// ===== State =====
+let step = 1;
+let bizType = null;
+let selected = [];
+let openSolution = null;
 
-const toStep2Btn = document.getElementById("toStep2");
-const toStep3Btn = document.getElementById("toStep3");
-const backTo1Btn = document.getElementById("backTo1");
-const backTo2Btn = document.getElementById("backTo2");
-const resetBtn = document.getElementById("resetBtn");
+// ===== DOM refs =====
+const stepper = document.getElementById('stepper');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const needsTitle = document.getElementById('needsTitle');
+const needsGrid = document.getElementById('needsGrid');
+const solutionsGrid = document.getElementById('solutionsGrid');
+const resetBtn = document.getElementById('resetBtn');
+const adjustNeedsBtn = document.getElementById('adjustNeeds');
 
-// Modal
-const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modalTitle");
-const modalBody = document.getElementById("modalBody");
-const modalProductLink = document.getElementById("modalProductLink");
-const modalPaperLink = document.getElementById("modalPaperLink");
-const modalClose = document.getElementById("modalClose");
+const modal = document.getElementById('modal');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalClose = document.getElementById('modalClose');
+const modalTitle = document.getElementById('modalTitle');
+const modalLinks = document.getElementById('modalLinks');
+const modalMatches = document.getElementById('modalMatches');
+const modalMisses = document.getElementById('modalMisses');
+const allFeatures = document.getElementById('allFeatures');
+const terminalDetails = document.getElementById('terminalDetails');
+const shift4Details = document.getElementById('shift4Details');
 
+// ===== Init =====
 init();
-
 async function init() {
   try {
     const res = await fetch(DATA_URL, { cache: "no-store" });
     DATA = await res.json();
-  } catch (e) {
-    console.error("Failed to load data:", e);
-    alert("Could not load /data/solutions.json");
+  } catch (err) {
+    console.error("Failed to load data/solutions.json", err);
+    alert("Could not load data/solutions.json. Check the file path and commit.");
     return;
   }
-
-  renderStep1();
-  wireUI();
+  render();
 }
 
-function wireUI() {
-  toStep2Btn.addEventListener("click", () => gotoStep(2));
-  backTo1Btn.addEventListener("click", () => gotoStep(1));
-  toStep3Btn.addEventListener("click", () => {
-    renderResults();
-    gotoStep(3);
-  });
-  backTo2Btn.addEventListener("click", () => gotoStep(2));
-  resetBtn.addEventListener("click", () => resetFlow());
+// ===== Rendering (exactly your original styles) =====
+function render() { renderStepper(); renderStep1(); renderStep2(); renderStep3(); }
 
-  // Modal close
-  modalClose.addEventListener("click", closeModal);
-  modal.addEventListener("click", (e) => {
-    if (e.target.dataset.close === "true") closeModal();
+function renderStepper() {
+  [...stepper.children].forEach((el, i) => {
+    const idx = i + 1;
+    const active = step === idx;
+    const done = step > idx;
+    el.className =
+      "rounded-xl border px-3 py-2 " +
+      (active
+        ? "border-blue-400 bg-blue-900 text-blue-100"
+        : done
+        ? "border-blue-300 bg-slate-800 text-blue-300"
+        : "border-slate-700 bg-slate-800 text-slate-400");
   });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
-  });
-}
-
-function gotoStep(n) {
-  // Update stepper highlight
-  [...stepper.querySelectorAll("[data-step]")].forEach((el) => {
-    const step = Number(el.dataset.step);
-    if (step === n) {
-      el.className = "px-3 py-1 rounded-full bg-emerald-600/20 border border-emerald-600/30";
-    } else {
-      el.className = "px-3 py-1 rounded-full bg-neutral-800 border border-neutral-700";
-    }
-  });
-
-  step1.classList.add("hidden");
-  step2.classList.add("hidden");
-  step3.classList.add("hidden");
-  if (n === 1) step1.classList.remove("hidden");
-  if (n === 2) step2.classList.remove("hidden");
-  if (n === 3) step3.classList.remove("hidden");
-}
-
-function resetFlow() {
-  state = { category: null, selected: new Set() };
-  toStep2Btn.disabled = true;
-  renderStep1();
-  gotoStep(1);
 }
 
 function renderStep1() {
-  categoryWrap.innerHTML = "";
+  step1.innerHTML = "";
+  step1.classList.toggle('hidden', step !== 1);
   const cats = DATA.categories || [];
-  cats.forEach((cat) => {
-    const btn = document.createElement("button");
-    btn.className = "card w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-left";
-    btn.textContent = cat;
-    btn.addEventListener("click", () => {
-      state.category = cat;
-      toStep2Btn.disabled = false;
-      [...categoryWrap.children].forEach((c) => c.classList.remove("ring-2","ring-emerald-500"));
-      btn.classList.add("ring-2","ring-emerald-500");
-      // preload Step 2
-      renderStep2();
-    });
-    categoryWrap.appendChild(btn);
+  const iconMap = { Restaurant: "🍽️", Retail: "🛍️" };
+  cats.forEach(label => {
+    const btn = document.createElement('button');
+    btn.type = "button";
+    btn.className =
+      "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700";
+    btn.onclick = () => { bizType = label; step = 2; render(); };
+
+    const iconDiv = document.createElement('div');
+    iconDiv.className = "text-lg";
+    iconDiv.textContent = iconMap[label] || "💼";
+
+    const left = document.createElement('div');
+    left.className = "flex-1 text-left";
+    left.innerHTML = `
+      <div class="font-semibold text-slate-100">${label}</div>
+      <div class="text-xs text-slate-400">Tap to select this business type</div>
+    `;
+
+    const bullet = document.createElement('div');
+    bullet.className = "h-5 w-5 rounded-full border border-slate-600";
+
+    btn.append(iconDiv, left, bullet);
+    step1.appendChild(btn);
   });
 }
 
 function renderStep2() {
-  featuresWrap.innerHTML = "";
-  state.selected = new Set(); // reset when changing categories
-  const list = (DATA.features && DATA.features[state.category]) || [];
-  list.forEach((feat) => {
-    const id = `feat_${feat.id}`;
-    const label = document.createElement("label");
-    label.className = "flex items-center gap-3 p-2 rounded-lg bg-neutral-800 border border-neutral-700 hover:bg-neutral-700";
-    label.innerHTML = `
-      <input id="${id}" type="checkbox" class="h-4 w-4 rounded border-neutral-600 bg-neutral-900">
-      <span>${escapeHTML(feat.label)}</span>
-    `;
-    label.querySelector("input").addEventListener("change", (e) => {
-      if (e.target.checked) state.selected.add(feat.id);
-      else state.selected.delete(feat.id);
-    });
-    featuresWrap.appendChild(label);
+  step2.classList.toggle('hidden', step !== 2);
+  if (step !== 2) return;
+
+  needsTitle.textContent = `What does this ${bizType} need?`;
+  needsGrid.innerHTML = "";
+
+  const menu = (DATA.features && DATA.features[bizType]) ? DATA.features[bizType] : [];
+  menu.forEach(f => {
+    const label = document.createElement('label');
+    label.className = "flex cursor-pointer items-center gap-3 rounded-xl border border-slate-700 bg-slate-800 p-3 hover:bg-slate-700";
+
+    const input = document.createElement('input');
+    input.type = "checkbox";
+    input.className = "h-4 w-4";
+    input.checked = selected.includes(f.id);
+    input.onchange = () => {
+      if (selected.includes(f.id)) selected = selected.filter(x => x !== f.id);
+      else selected.push(f.id);
+    };
+
+    const span = document.createElement('span');
+    span.className = "text-sm text-slate-100";
+    span.textContent = f.label;
+
+    label.append(input, span);
+    needsGrid.appendChild(label);
   });
+
+  document.getElementById('selectAll').onclick = () => { selected = menu.map(f => f.id); renderStep2(); };
+  document.getElementById('clearAll').onclick = () => { selected = []; renderStep2(); };
+  document.getElementById('backTo1').onclick = () => { step = 1; render(); };
+  document.getElementById('toStep3').onclick  = () => { step = 3; render(); };
 }
 
-function renderResults() {
-  resultsWrap.innerHTML = "";
-  const selected = Array.from(state.selected);
-  selectionSummary.textContent =
-    `${state.category} • ${selected.length} need${selected.length===1?"":"s"} selected`;
+function scoreSolution(sol) {
+  if (selected.length === 0) return 100;
+  const tags = new Set(sol.tags || []);
+  const overlap = selected.filter(t => tags.has(t)).length;
+  return Math.round((overlap / Math.max(selected.length, 1)) * 100);
+}
 
-  const solutions = (DATA.solutions || []).filter(s => s.category === state.category);
+function makeSolutionCard(sol, score) {
+  const btn = document.createElement('button');
+  btn.type = "button";
+  btn.className = "text-left w-full";
+  btn.onclick = () => openAnalysis(sol);
 
-  const scored = solutions.map((s) => {
-    const tags = new Set(s.tags || []);
-    let matches = 0;
-    selected.forEach((id) => { if (tags.has(id)) matches++; });
-    const score = selected.length ? Math.round((matches / selected.length) * 100) : 0;
-    const misses = selected.filter((id) => !tags.has(id));
-    const matched = selected.filter((id) => tags.has(id));
-    return { solution: s, score, matches: matched, misses };
-  }).sort((a, b) => b.score - a.score);
+  const card = document.createElement('div');
+  card.className = "rounded-2xl border border-blue-500/40 bg-slate-800 p-4 shadow-sm transition hover:shadow-md";
 
-  if (scored.length === 0) {
-    resultsWrap.innerHTML = `<div class="text-neutral-300">No solutions for ${escapeHTML(state.category)} yet.</div>`;
-    return;
+  const top = document.createElement('div');
+  top.className = "mb-1 flex items-start justify-between gap-3";
+
+  const title = document.createElement('h3');
+  title.className = "text-base font-semibold text-slate-100";
+  title.textContent = sol.name;
+
+  const badge = document.createElement('span');
+  badge.className = "inline-flex items-center rounded-full border border-blue-400 bg-blue-900/40 px-2 py-0.5 text-xs font-medium text-blue-200";
+  badge.textContent = sol.category;
+
+  top.append(title, badge);
+
+  const desc = document.createElement('p');
+  desc.className = "mb-3 text-sm text-slate-300";
+  desc.textContent = sol.summary || "";
+
+  const ms = document.createElement('div');
+  const scoreColor = score > 0 ? "text-green-400" : "text-red-400";
+  ms.className = "mb-3 text-xs text-slate-300";
+  ms.innerHTML = `Match score: <span class="font-semibold ${scoreColor}">${score}%</span>`;
+
+  card.append(top, desc, ms);
+  btn.appendChild(card);
+  return btn;
+}
+
+function renderStep3() {
+  step3.classList.toggle('hidden', step !== 3);
+  if (step !== 3) return;
+
+  solutionsGrid.innerHTML = "";
+  const pool = (DATA.solutions || []).filter(s => s.category === bizType);
+  const scored = pool.map(s => ({ s, score: scoreSolution(s) })).sort((a,b) => b.score - a.score);
+
+  if (!scored.length) {
+    const empty = document.createElement('div');
+    empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
+    empty.textContent = "No matches yet. Try adding or removing needs.";
+    solutionsGrid.appendChild(empty);
+  } else {
+    scored.forEach(({s, score}) => solutionsGrid.appendChild(makeSolutionCard(s, score)));
   }
 
-  scored.forEach(({ solution, score, matches, misses }) => {
-    const card = document.createElement("button");
-    card.className = "card text-left w-full p-4 rounded-xl bg-neutral-800 border border-neutral-700 hover:bg-neutral-700";
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-base font-semibold">${escapeHTML(solution.name)}</div>
-          <div class="text-neutral-300 text-sm">${escapeHTML(solution.summary || "")}</div>
-          <div class="mt-2 flex flex-wrap gap-1">
-            ${matches.slice(0,6).map(id => `<span class="chip px-2 py-0.5 rounded-full text-xs bg-neutral-900">${escapeHTML(labelFor(id))}</span>`).join("")}
-          </div>
-        </div>
-        <div class="shrink-0 text-right">
-          <div class="text-2xl font-bold">${score}%</div>
-          <div class="text-xs text-neutral-400">match</div>
-        </div>
-      </div>
-    `;
-    card.addEventListener("click", () => openModal({solution, score, matches, misses}));
-    resultsWrap.appendChild(card);
-  });
+  adjustNeedsBtn.onclick = () => { step = 2; render(); };
 }
 
-function openModal({solution, score, matches, misses}) {
-  modalTitle.textContent = solution.name;
-  modalProductLink.href = (solution.links && solution.links.product) || "#";
-  modalPaperLink.href = (solution.links && solution.links.paperwork) || "#";
+// ===== Modal control =====
+function openAnalysis(sol) {
+  openSolution = sol;
 
-  const blocks = [];
+  modalTitle.textContent = sol.name;
+  modalLinks.innerHTML = "";
+  if (sol.links?.product) {
+    const a = document.createElement('a');
+    a.href = sol.links.product; a.target = "_blank"; a.rel = "noreferrer";
+    a.className = "rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700";
+    a.textContent = "Official product page ↗";
+    modalLinks.appendChild(a);
+  }
+  if (sol.links?.paperwork) {
+    const a2 = document.createElement('a');
+    a2.href = sol.links.paperwork; a2.target = "_blank"; a2.rel = "noreferrer";
+    a2.className = "rounded-lg bg-blue-900/30 px-3 py-2 text-xs font-medium text-blue-200 ring-1 ring-blue-800 hover:bg-blue-900/50";
+    a2.textContent = "Paperwork ↗";
+    modalLinks.appendChild(a2);
+  }
 
-  // Score / summary
-  blocks.push(`
-    <div class="flex items-center justify-between">
-      <div>
-        <div class="text-sm text-neutral-300">${escapeHTML(solution.summary || "")}</div>
-        ${Array.isArray(solution.details) && solution.details.length ? `
-          <ul class="mt-2 list-disc list-inside text-neutral-200">
-            ${solution.details.map(d => `<li>${escapeHTML(d)}</li>`).join("")}
-          </ul>
-        ` : ""}
-      </div>
-      <div class="text-right">
-        <div class="text-3xl font-bold">${score}%</div>
-        <div class="text-xs text-neutral-400">overall match</div>
-      </div>
-    </div>
-  `);
+  const tags = new Set(sol.tags || []);
+  const matches = selected.filter(f => tags.has(f)).map(id => labelFor(id));
+  const misses  = selected.filter(f => !tags.has(f)).map(id => labelFor(id));
 
-  // Matches / Misses
-  blocks.push(`
-    <div class="grid sm:grid-cols-2 gap-3">
-      <div class="p-3 rounded-lg bg-neutral-800 border border-neutral-700">
-        <div class="font-semibold mb-1">Matches</div>
-        <div class="flex flex-wrap gap-1">
-          ${matches.length ? matches.map(id => `<span class="chip px-2 py-0.5 rounded-full text-xs bg-emerald-900/30 border border-emerald-700/40">${escapeHTML(labelFor(id))}</span>`).join("") : '<span class="text-neutral-400 text-sm">None selected</span>'}
-        </div>
-      </div>
-      <div class="p-3 rounded-lg bg-neutral-800 border border-neutral-700">
-        <div class="font-semibold mb-1">Misses</div>
-        <div class="flex flex-wrap gap-1">
-          ${misses.length ? misses.map(id => `<span class="chip px-2 py-0.5 rounded-full text-xs bg-neutral-900">${escapeHTML(labelFor(id))}</span>`).join("") : '<span class="text-neutral-400 text-sm">No gaps</span>'}
-        </div>
-      </div>
-    </div>
-  `);
+  modalMatches.innerHTML = matches.length ? matches.map(f => `<li>${escapeHTML(f)}</li>`).join("") : "<li>No direct matches selected.</li>";
+  modalMisses.innerHTML  = selected.length ? misses.map(f => `<li>${escapeHTML(f)}</li>`).join("") : "<li>No needs selected.</li>";
+
+  // Show all features (labels) that solution supports
+  const allLabels = (sol.tags || []).map(id => labelFor(id));
+  allFeatures.innerHTML = allLabels.map(f =>
+    `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${escapeHTML(f)}</span>`
+  ).join("");
 
   // Special blocks
-  if (solution.special_block === "terminalDetails") {
-    blocks.push(renderTerminalDetailsBlock());
-  }
-  if (solution.special_block === "shift4Details") {
-    blocks.push(renderShift4DetailsBlock());
-  }
+  terminalDetails.classList.add('hidden');
+  shift4Details.classList.add('hidden');
+  if (sol.special_block === "terminalDetails") terminalDetails.classList.remove('hidden');
+  if (sol.special_block === "shift4Details")   shift4Details.classList.remove('hidden');
 
-  modalBody.innerHTML = blocks.join("\n");
-  modal.classList.remove("hidden");
-  document.documentElement.classList.add("modal-open");
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  document.documentElement.classList.add('scroll-lock');
+  document.body.classList.add('scroll-lock');
 }
 
 function closeModal() {
-  modal.classList.add("hidden");
-  document.documentElement.classList.remove("modal-open");
+  modal.classList.add('hidden'); modal.classList.remove('flex');
+  openSolution = null;
+  document.documentElement.classList.remove('scroll-lock');
+  document.body.classList.remove('scroll-lock');
 }
 
-function labelFor(id) {
-  // Resolve id -> label using feature lists
-  const lists = DATA.features || {};
-  for (const cat of Object.keys(lists)) {
-    const found = lists[cat].find(f => f.id === id);
-    if (found) return found.label;
+function labelFor(id){
+  // find the label by id across all categories
+  const feats = DATA.features || {};
+  for (const cat of Object.keys(feats)) {
+    const f = feats[cat].find(x => x.id === id);
+    if (f) return f.label;
   }
-  // fall back to id
   return id;
 }
+function escapeHTML(s){ return String(s ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
 
-function escapeHTML(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-
-/* ----- Special Blocks ----- */
-
-function renderTerminalDetailsBlock() {
-  return `
-    <div class="p-3 rounded-lg bg-neutral-800 border border-neutral-700">
-      <div class="font-semibold mb-1">Terminal Details</div>
-      <ul class="list-disc list-inside text-neutral-200 space-y-1">
-        <li>Valor 100 — countertop EMV/NFC</li>
-        <li>Dejavoo QD4 — wireless/wifi capable</li>
-        <li>PAX A80 — compact countertop</li>
-        <li>Dejavoo P3 — portable</li>
-      </ul>
-    </div>
-  `;
-}
-
-function renderShift4DetailsBlock() {
-  return `
-    <div class="p-3 rounded-lg bg-neutral-800 border border-neutral-700">
-      <div class="font-semibold mb-1">Shift4 Terminal Notes</div>
-      <ul class="list-disc list-inside text-neutral-200 space-y-1">
-        <li>EMV + Contactless across supported models</li>
-        <li>PCI scope reduction features</li>
-        <li>Receipt printing options</li>
-      </ul>
-    </div>
-  `;
-}
+// ===== Events =====
+modalBackdrop.addEventListener('click', closeModal);
+modalClose.addEventListener('click', closeModal);
+resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
