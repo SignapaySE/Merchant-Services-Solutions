@@ -26,7 +26,7 @@ const changeLog = document.getElementById("changeLog");
 // Features UI
 const categoryList = document.getElementById("categoryList");
 const featureList = document.getElementById("featureList");
-const selectedFeatId = document.getElementById("selectedFeatId"); // hidden (stable id)
+const selectedFeatId = document.getElementById("selectedFeatId"); // hidden stable id
 const featLabel = document.getElementById("featLabel");
 const idPreview = document.getElementById("idPreview");
 const usedBy = document.getElementById("usedBy");
@@ -38,7 +38,7 @@ const delFeatBtn = document.getElementById("delFeatBtn");
 const solnCategoryFilter = document.getElementById("solnCategoryFilter");
 const solutionsList = document.getElementById("solutionsList");
 
-const s_id = document.getElementById("s_id");
+const s_id = document.getElementById("s_id"); // hidden (auto-generated)
 const s_name = document.getElementById("s_name");
 const s_category = document.getElementById("s_category");
 const s_special = document.getElementById("s_special");
@@ -48,9 +48,9 @@ const s_link_product = document.getElementById("s_link_product");
 const s_link_paper = document.getElementById("s_link_paper");
 const tagPicker = document.getElementById("tagPicker");
 
+const newSolutionBtn = document.getElementById("newSolutionBtn");
 const saveSolutionBtn = document.getElementById("saveSolutionBtn");
 const deleteSolutionBtn = document.getElementById("deleteSolutionBtn");
-// const clearFormBtn removed by request
 
 // ---------- Gate ----------
 enterBtn.addEventListener("click", async () => {
@@ -106,15 +106,8 @@ async function bootstrapFromServer(){
 }
 
 function setStatus(s){ statusEl.textContent = s; }
-function setLastLoaded(){
-  const ts = new Date().toLocaleString();
-  lastLoadedEl.textContent = `Last loaded: ${ts}`;
-}
-function markDirty(description){
-  dirty = true;
-  if (description) changeList.push(description);
-  renderDirty();
-}
+function setLastLoaded(){ lastLoadedEl.textContent = `Last loaded: ${new Date().toLocaleString()}`; }
+function markDirty(description){ dirty = true; if (description) changeList.push(description); renderDirty(); }
 function renderDirty(){
   dirtyStateEl.textContent = dirty ? "Unsaved changes" : "No changes";
   dirtyStateEl.className = "text-xs mt-1 " + (dirty ? "text-amber-400" : "text-neutral-500");
@@ -173,14 +166,13 @@ function renderFeatureList(){
   feats.forEach(f=>{
     const chip = document.createElement("button");
     chip.className = "px-2 py-1 rounded-full text-xs bg-neutral-900 hover:bg-neutral-800 border border-neutral-700";
-    chip.textContent = `${f.label}`; // hide id from UI
+    chip.textContent = `${f.label}`; // hide id
     chip.addEventListener("click", ()=>{
       selectedFeatId.value = f.id; // locked id
       featLabel.value = f.label;
       updateIdPreview();
-      // usage info
       const used = findSolutionsUsingTag(window.activeCategory, f.id);
-      usedBy.textContent = used.length ? `Used by ${used.length} solution(s): ${used.map(s=>s.name).join(", ")}` : "Not used by any solutions.";
+      usedBy.textContent = used.length ? `Used by ${used.length} solution(s) in ${window.activeCategory}: ${used.map(s=>s.name).join(", ")}` : "Not used by any solutions.";
     });
     featureList.appendChild(chip);
   });
@@ -188,15 +180,14 @@ function renderFeatureList(){
 function clearFeatureForm(){
   selectedFeatId.value = "";
   featLabel.value = "";
-  idPreview.textContent = "New ID will appear here";
+  idPreview.textContent = "New ID will be generated automatically";
   usedBy.textContent = "";
 }
 function updateIdPreview(){
   if(selectedFeatId.value){
     idPreview.textContent = `Selected feature (ID hidden)`;
   }else{
-    const gen = slugify(featLabel.value || "");
-    idPreview.textContent = gen ? `New ID will be generated automatically` : "New ID will appear here";
+    idPreview.textContent = `New ID will be generated automatically`;
   }
 }
 
@@ -227,13 +218,13 @@ addFeatBtn.addEventListener("click", e=>{
 // Rename selected (confirm because it changes existing)
 renameFeatBtn.addEventListener("click", ()=>{
   if(!window.activeCategory) return alert("Select a category.");
-  const id = sTrim(selectedFeatId.value); if(!id) return alert("Select a feature from the list to rename.");
+  const id = sTrim(selectedFeatId.value); if(!id) return alert("Select a feature to rename.");
   const label = sTrim(featLabel.value); if(!label) return alert("Feature label is required.");
 
   const list = DATA.features[window.activeCategory] || [];
   const idx = list.findIndex(f=>f.id===id); if(idx<0) return alert("Feature not found.");
 
-  if(!confirm(`Update label for this existing feature?\n\nNew label: ${label}`)) return;
+  if(!confirm(`Update label for this existing feature in ${window.activeCategory}?\n\nNew label: ${label}`)) return;
 
   list[idx].label = label; // ID stays the same
   DATA.features[window.activeCategory] = list;
@@ -245,7 +236,7 @@ renameFeatBtn.addEventListener("click", ()=>{
   setStatus("Feature label update staged");
 });
 
-// Delete selected (confirm; auto-remove tag from solutions)
+// Delete selected (confirm; auto-remove tag from solutions in THIS category only)
 delFeatBtn.addEventListener("click", ()=>{
   if(!window.activeCategory) return;
   const id = sTrim(selectedFeatId.value); if(!id) return alert("Select a feature to delete.");
@@ -255,15 +246,15 @@ delFeatBtn.addEventListener("click", ()=>{
 
   const used = findSolutionsUsingTag(window.activeCategory, id);
   const usedMsg = used.length
-    ? `\n\nThis feature is currently used by ${used.length} solution(s):\n- ${used.map(s=>s.name).join("\n- ")}\n\nIt will be removed from those solutions automatically.`
+    ? `\n\nThis feature is used by ${used.length} solution(s) in ${window.activeCategory}:\n- ${used.map(s=>s.name).join("\n- ")}\n\nIt will be removed from those solutions automatically.`
     : "";
 
-  if(!confirm(`Delete this feature?${usedMsg}`)) return;
+  if(!confirm(`Delete this feature from ${window.activeCategory}?${usedMsg}`)) return;
 
-  // Remove feature
+  // Remove feature from this category
   list.splice(idx,1); DATA.features[window.activeCategory] = list;
 
-  // Auto-remove tag from any solutions that used it
+  // Remove tag from any solutions in this category that used it
   if (used.length){
     used.forEach(sol=>{
       sol.tags = (sol.tags||[]).filter(t => t !== id);
@@ -273,7 +264,7 @@ delFeatBtn.addEventListener("click", ()=>{
   clearFeatureForm();
   renderFeatureList();
   renderTagPicker();
-  renderSolutionsList(); // counts change
+  renderSolutionsList();
   markDirty(`Delete feature in ${window.activeCategory}`);
   setStatus("Feature deletion staged");
 });
@@ -298,7 +289,6 @@ function renderSolutionsList(){
   sols.forEach(s=>{
     const btn = document.createElement("button");
     btn.className = "w-full p-3 rounded-lg bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 text-left";
-    // hide ids in the list; show name + category, and tag count
     btn.innerHTML = `<div class="flex items-center justify-between">
       <div><div class="font-semibold">${escapeHTML(s.name)}</div>
       <div class="text-xs text-neutral-400">${escapeHTML(s.category)}</div></div>
@@ -314,16 +304,23 @@ solnCategoryFilter.addEventListener("change", ()=>{
   renderSolutionsList();
   renderTagPicker();
 });
+
 function loadSolutionIntoForm(id){
   const s = (DATA.solutions || []).find(x=>x.id===id); if(!s) return;
   window.selectedSolutionId = s.id;
-  s_id.value=s.id; s_name.value=s.name||""; s_category.value=s.category||DATA.categories?.[0]||"";
-  s_special.value=s.special_block||""; s_summary.value=s.summary||"";
+  s_id.value=s.id;                 // hidden, immutable during edit
+  s_name.value=s.name||"";
+  s_category.value=s.category||DATA.categories?.[0]||"";
+  s_special.value=s.special_block||"";
+  s_summary.value=s.summary||"";
   s_details.value=(Array.isArray(s.details)?s.details:[]).join("\n");
-  s_link_product.value=(s.links&&s.links.product)||""; s_link_paper.value=(s.links&&s.links.paperwork)||"";
-  renderTagPicker(); const current = new Set(s.tags||[]);
+  s_link_product.value=(s.links&&s.links.product)||"";
+  s_link_paper.value=(s.links&&s.links.paperwork)||"";
+  renderTagPicker();
+  const current = new Set(s.tags||[]);
   [...tagPicker.querySelectorAll("input[type=checkbox]")].forEach(cb=>cb.checked=current.has(cb.value));
 }
+
 function renderTagPicker(){
   tagPicker.innerHTML = "";
   const cat = s_category.value || window.activeCategory || DATA.categories?.[0];
@@ -331,13 +328,26 @@ function renderTagPicker(){
   feats.forEach(f=>{
     const label = document.createElement("label");
     label.className = "flex items-center gap-2 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-xs";
-    // show label only; no id
     label.innerHTML = `<input type="checkbox" value="${escapeHTML(f.id)}" class="h-3 w-3 rounded border-neutral-600 bg-neutral-900">
       <span>${escapeHTML(f.label)}</span>`;
     tagPicker.appendChild(label);
   });
 }
 s_category.addEventListener("change", renderTagPicker);
+
+// New Solution
+newSolutionBtn.addEventListener("click", ()=>{
+  window.selectedSolutionId = null;
+  s_id.value = ""; // no id yet; will generate on save
+  s_name.value = "";
+  s_category.value = window.activeCategory || (DATA.categories?.[0] || "");
+  s_special.value = "";
+  s_summary.value = "";
+  s_details.value = "";
+  s_link_product.value = "";
+  s_link_paper.value = "";
+  renderTagPicker();
+});
 
 // Add/Update/Delete Solution
 saveSolutionBtn.addEventListener("click", e=>{
@@ -346,7 +356,7 @@ saveSolutionBtn.addEventListener("click", e=>{
     const s = collectSolutionFromForm();
     const exists = (DATA.solutions||[]).find(x=>x.id===s.id);
     const verb = exists ? "Update" : "Add";
-    // Confirm ONLY if updating an existing one
+    // Confirm ONLY if updating
     if (exists) {
       if (!confirm(`Update this existing solution?\n\n${s.name}`)) return;
     }
@@ -356,54 +366,63 @@ saveSolutionBtn.addEventListener("click", e=>{
     setStatus(`Solution ${verb.toLowerCase()} staged`);
   } catch(err){ alert(err.message); }
 });
+
 deleteSolutionBtn.addEventListener("click", ()=>{
-  const id = sTrim(s_id.value); if(!id) return alert("Enter the ID to delete.");
+  const id = sTrim(s_id.value); if(!id) return alert("Load a solution first (click it in the list).");
   const idx = (DATA.solutions||[]).findIndex(x=>x.id===id);
   if(idx<0) return alert("Solution not found.");
   if(!confirm(`Delete this solution?`)) return;
   DATA.solutions.splice(idx,1);
-  // keep a light reset so tagPicker reflects empty state
-  loadBlankSolutionForm();
+  // reset form
+  newSolutionBtn.click();
   renderSolutionsList();
   markDirty(`Delete solution`);
   setStatus("Solution deletion staged");
 });
 
-// (No dedicated Clear Form button)
-function loadBlankSolutionForm(){
-  window.selectedSolutionId=null;
-  s_id.value=""; s_name.value=""; s_category.value=DATA.categories?.[0]||"";
-  s_special.value=""; s_summary.value=""; s_details.value="";
-  s_link_product.value=""; s_link_paper.value="";
-  renderTagPicker();
-}
-
-// ------ Collect / Upsert ------
+// Collect & Upsert
 function collectSolutionFromForm(){
-  const id=sTrim(s_id.value), name=sTrim(s_name.value), category=sTrim(s_category.value);
-  if(!id||!name||!category) throw new Error("ID, Name, and Category are required.");
+  let id = sTrim(s_id.value);        // hidden and may be empty for brand new
+  const name = sTrim(s_name.value);
+  const category = sTrim(s_category.value);
+
+  if(!name || !category) throw new Error("Name and Category are required.");
+
+  // Auto-generate ID if this is a new solution
+  if (!id) {
+    const base = slugify(name);
+    if (!base) throw new Error("Could not generate an ID from Name; please try a different Name.");
+    id = uniqueSolutionId(base);
+  }
+
+  // Prevent collision only when creating a *new* record
   const exists = (DATA.solutions||[]).find(x=>x.id===id);
-  if(exists && window.selectedSolutionId!==id) throw new Error(`Solution ID "${id}" already exists.`);
+  if(exists && window.selectedSolutionId!==id) throw new Error(`Solution ID already exists (derived from Name). Try a different Name.`);
+
   const tags = [...tagPicker.querySelectorAll("input[type=checkbox]:checked")].map(cb=>cb.value);
   const details = s_details.value.split("\n").map(x=>x.trim()).filter(Boolean);
   const links = { product:sTrim(s_link_product.value), paperwork:sTrim(s_link_paper.value) };
   const special_block = sTrim(s_special.value) || undefined;
 
-  // Validate tag set against category features (should already be safe via checkboxes)
+  // Category-safe tags
   const feats = (DATA.features && DATA.features[category]) || [];
   const allowed = new Set(feats.map(f=>f.id));
   const bad = tags.filter(t=>!allowed.has(t));
   if (bad.length) throw new Error(`These tags are not valid in ${category}: ${bad.join(", ")}`);
 
+  // Write back the generated/locked id (still hidden)
+  s_id.value = id;
+
   return { id, name, category, tags, summary:s_summary.value, details, links, ...(special_block?{special_block}:{}) };
 }
+
 function upsertSolution(s){
   if(!Array.isArray(DATA.solutions)) DATA.solutions=[];
   const i=DATA.solutions.findIndex(x=>x.id===s.id);
   if(i>=0) DATA.solutions[i]=s; else DATA.solutions.push(s);
 }
 
-// ---------- Utils ----------
+// ---------- Validation & Utils ----------
 function validateData(obj, strict=false){
   if(typeof obj!=="object"||!obj) throw new Error("Root must be an object.");
   if(!Array.isArray(obj.categories)) throw new Error("categories must be an array.");
@@ -425,9 +444,8 @@ function validateData(obj, strict=false){
   }
   const seenSol=new Set();
   obj.solutions.forEach(s=>{
-    if(!s.id||!s.name||!s.category) throw new Error("Each solution needs id, name, category");
+    if(!s.id||!s.name||!s.category) throw new Error("Each solution needs id (hidden), name, category");
     if(seenSol.has(s.id)) throw new Error(`Duplicate solution id "${s.id}"`);
-    // ensure tags exist for their category
     const feats = (obj.features && obj.features[s.category]) || [];
     const allowed = new Set(feats.map(f=>f.id));
     (s.tags||[]).forEach(t=>{
@@ -453,4 +471,10 @@ function slugify(label){
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .replace(/_{2,}/g, "_");
+}
+function uniqueSolutionId(base){
+  let id = base, n = 2;
+  const list = DATA.solutions || [];
+  while (list.some(s => s.id === id)) id = `${base}_${n++}`;
+  return id;
 }
