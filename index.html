@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <!-- Mobile viewport tuned for iOS Safari -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Merchant Solutions Finder</title>
+  <title>Merchant Services Solutions</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preload" href="data/solutions.json" as="fetch" crossorigin="anonymous">
   <style>
@@ -13,43 +13,71 @@
     .scroll-lock { overflow: hidden; height: 100%; }
     .modal-scroll { -webkit-overflow-scrolling: touch; }
   </style>
+
+<style>
+  /* Chevron chips for the step tabs */
+  .step-chev {
+    position: relative;
+    padding-right: 2.25rem; /* space for chevron tip */
+  }
+  .step-chev::after {
+    content: "";
+    position: absolute;
+    top: 0; right: -1.05rem; /* half overlaps the next chip */
+    width: 1.2rem; height: 100%;
+    background: inherit;
+    transform: skewX(30deg);
+    border-right: 1px solid rgba(148,163,184,.35); /* slate-400/35 */
+    border-top: 1px solid rgba(148,163,184,.35);
+    border-bottom: 1px solid rgba(148,163,184,.35);
+    border-left: none;
+    border-radius: 0 .5rem .5rem 0;
+    z-index: 1;
+  }
+  /* Remove right chevron on the last step */
+  .step-chev.last::after { display: none; }
+  /* Subtle outline for inactive tabs; filled for active (reuse your existing active class) */
+  .step-chev.inactive { background: transparent; }
+  .step-chev.active   { background: rgba(30,41,59,.6); /* slate-800/60 */ }
+</style>
+
+
 </head>
 <body class="min-h-screen bg-slate-900 font-sans text-slate-100">
   <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
     <!-- Header (exact look from your original) -->
-    <header class="mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm">
+    <header class="relative mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center gap-3 md:gap-4">
-          <img src="https://static.wixstatic.com/media/e80bbd_a8148979599e4221be758a561140d67a~mv2.png"
-               alt="SignaPay Southeast"
-               class="h-12 w-auto object-contain sm:h-14 md:h-16"/>
+<img src="https://static.wixstatic.com/media/e80bbd_a8148979599e4221be758a561140d67a~mv2.png"
+     alt="SignaPay Southeast"
+     class="absolute bottom-2 right-3 h-12 w-auto sm:h-14 md:h-16 opacity-90 hover:opacity-100 transition"/>
           <div class="flex-1 min-w-0">
-            <h1 class="truncate text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-              Merchant Solutions Finder
-            </h1>
-            <p class="text-xs text-blue-100 sm:text-sm">Helping you find the right fit</p>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Merchant Services Solutions</h1>
+           <p class="text-sm md:text-base text-slate-200/80">Find the perfect product</p>
           </div>
         </div>
-        <div class="flex md:self-start">
-         <a href="admin.html"
-            class="rounded-full bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
-            title="Admin (password required)">
-           Admin
-          </a>
-          <button id="resetBtn" type="button"
-                  class="rounded-full bg-white/10 px-3 py-1 text-xs hover:bg-white/20">
-            Reset
-          </button>
-        </div>
+<button id="resetBtn" type="button"
+        class="rounded-full bg-white/10 px-3 py-1 text-xs hover:bg-white/20 
+               border border-slate-400/40 shadow-sm hover:bg-slate-700/40 text-slate-100">
+  Reset
+</button>
       </div>
     </header>
 
     <!-- Stepper -->
     <nav class="mb-6 grid grid-cols-3 gap-2 text-[11px] sm:text-xs" id="stepper">
-      <div class="rounded-xl border px-3 py-2">1. Business type</div>
-      <div class="rounded-xl border px-3 py-2">2. Needs</div>
-      <div class="rounded-xl border px-3 py-2">3. Solutions</div>
+      <div class="step-chev inactive border px-3 py-2">1. Business type</div>
+      <div class="step-chev inactive border px-3 py-2">2. Needs</div>
+      <div class="step-chev last inactive border px-3 py-2">3. Solutions</div>
+
     </nav>
+
+<p id="categoryPrompt" class="mt-3 mb-2 text-sm text-slate-300 flex items-center justify-center gap-2">
+  <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky-300/80"></span>
+  <span>What type of business are you working with today?</span>
+</p>
+
 
     <!-- Step 1 -->
     <section id="step1" class="grid grid-cols-1 gap-3 md:grid-cols-2"></section>
@@ -152,10 +180,15 @@
         </div>
       </div>
     </div>
+<!-- Footer bar -->
+<footer class="mx-auto mt-10 flex items-center justify-between text-xs text-slate-400">
+  <div class="opacity-80">Powered by ArtificialSuperIntelligence.AI</div>
+  <a href="admin.html"
+     class="inline-flex items-center gap-1 rounded-md border border-slate-600/60 bg-slate-800/50 px-3 py-1.5 text-slate-100 hover:bg-slate-700/60 hover:brightness-110 transition">
+    Admin
+  </a>
+</footer>
 
-    <footer class="mt-10 text-center text-xs text-slate-400">
-      Clover, SkyTab, SignaPay, and Shift4 data provided · Links go to official sites
-    </footer>
   </div>
 
   <script src="app.js"></script>
