@@ -608,69 +608,65 @@ function cleanupAllSpecialBlocks(dataObj){
 }
 
 /* ===== Special Blocks (Advanced) ===== */
-(function () {
-  // ---- Exact IDs from your admin.html ----
+(function(){
+  // Button in the form that opens the modal
   const openBtn   = document.getElementById("openSpecialBlocks");
+
+  // Modal + parts (IDs match your admin.html)
   const modal     = document.getElementById("specialBlocksModal");
   const backdrop  = document.getElementById("sb_backdrop");
+  const closeBtn  = document.getElementById("sb_cancel"); // top-right Close
+
   const titleEl   = document.getElementById("sb_title");
+  const listEl    = document.getElementById("sbList");
+  const addBtn    = document.getElementById("sbAdd");
+
   const nameEl    = document.getElementById("sb_name");
   const descEl    = document.getElementById("sb_desc");
   const linkEl    = document.getElementById("sb_link");
+
   const saveBtn   = document.getElementById("sb_save");
-  const cancelBtn = document.getElementById("sb_cancel");
+  const delBtn    = document.getElementById("sb_delete");
 
-  if (!openBtn || !modal) return; // nothing to wire
+  if (!openBtn || !modal) return;
 
-  // Hold blocks while editing a brand-new (unsaved) solution
+  // For brand-new solutions, keep blocks here until you save the solution
   window.currentFormSpecialBlocks = window.currentFormSpecialBlocks || [];
+  let currentIndex = -1;
 
-  function getCurrentSolution(){
-    // Prefer currently-loaded solution (selected from the list)
-    const id =
-      (typeof window.selectedSolutionId !== "undefined" && window.selectedSolutionId) ||
-      (typeof s_id !== "undefined" ? (s_id.value || "").trim() : "") ||
-      null;
-
-    const found = id ? (DATA.solutions || []).find(s => s.id === id) : null;
-    if (found) return found;
-
-    // Fallback: work directly from the form (New Solution mode)
-    return {
-      id: id || "(unsaved)",
-      name: (typeof s_name !== "undefined" ? (s_name.value || "").trim() : "") || "",
-      specialBlocks: (window.currentFormSpecialBlocks ||= []),
-      _isTemp: true,
-    };
-  }
-
+  function trim(v){ return (v ?? "").toString().trim(); }
   function ensureArray(sol){
     if (!sol) return;
     if (!Array.isArray(sol.specialBlocks)) {
-      sol.specialBlocks = sol._isTemp
-        ? (window.currentFormSpecialBlocks ||= [])
-        : [];
+      sol.specialBlocks = sol._isTemp ? (window.currentFormSpecialBlocks ||= []) : [];
     }
+  }
+  function getCurrentSolution(){
+    const id = window.selectedSolutionId || (typeof s_id !== "undefined" ? trim(s_id.value) : "") || null;
+    const found = id ? (DATA.solutions || []).find(s => s.id === id) : null;
+    if (found) return found;
+    return {
+      id: id || "(unsaved)",
+      name: (typeof s_name !== "undefined" ? trim(s_name.value) : "") || "",
+      specialBlocks: (window.currentFormSpecialBlocks ||= []),
+      _isTemp: true,
+    };
   }
 
   function openModal(){
     const sol = getCurrentSolution();
     if (!sol) { alert("Select or create a solution first."); return; }
     ensureArray(sol);
-
-    // Reset fields for a new block
-    nameEl.value = "";
-    descEl.value = "";
-    linkEl.value = "";
-
-    if (titleEl) titleEl.textContent = `Special block — ${sol.name || sol.id}`;
+    titleEl.textContent = `Special Blocks — ${sol.name || sol.id}`;
+    currentIndex = -1;
+    clearForm();
+    renderList();
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
     document.documentElement.classList.add("scroll-lock");
     document.body.classList.add("scroll-lock");
   }
-
   function closeModal(){
     modal.classList.add("hidden");
     modal.classList.remove("flex");
@@ -678,47 +674,143 @@ function cleanupAllSpecialBlocks(dataObj){
     document.body.classList.remove("scroll-lock");
   }
 
-  function trim(v){ return (v ?? "").toString().trim(); }
+  function clearForm(){ nameEl.value = ""; descEl.value = ""; linkEl.value = ""; }
 
-  function saveBlock(){
-    const sol = getCurrentSolution();
-    if (!sol) { alert("Select or create a solution first."); return; }
+  function renderList(){
+    const sol = getCurrentSolution(); if (!sol) return;
     ensureArray(sol);
+    listEl.innerHTML = "";
+    sol.specialBlocks.forEach((b, idx) => {
+      const row = document.createElement("div");
+      row.className = "group flex items-center justify-between gap-2 rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-900" + (idx===currentIndex ? " ring-1 ring-emerald-500" : "");
 
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flex-1 text-left truncate";
+      btn.textContent = b?.name || `(Untitled ${idx+1})`;
+      btn.addEventListener("click", ()=> selectIndex(idx));
+
+      const controls = document.createElement("div");
+      controls.className = "flex items-center gap-1";
+
+      const up = document.createElement("button");
+      up.type = "button"; up.title = "Move up";
+      up.className = "rounded border border-neutral-700 px-1 py-0.5 hover:bg-neutral-800";
+      up.textContent = "↑";
+      up.addEventListener("click", (e)=>{ e.stopPropagation(); move(idx,-1); });
+
+      const down = document.createElement("button");
+      down.type = "button"; down.title = "Move down";
+      down.className = "rounded border border-neutral-700 px-1 py-0.5 hover:bg-neutral-800";
+      down.textContent = "↓";
+      down.addEventListener("click", (e)=>{ e.stopPropagation(); move(idx,1); });
+
+      controls.appendChild(up); controls.appendChild(down);
+      row.appendChild(btn); row.appendChild(controls);
+      listEl.appendChild(row);
+    });
+  }
+
+  function selectIndex(idx){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    currentIndex = idx;
+    const b = sol.specialBlocks[idx] || {};
+    nameEl.value = b.name || "";
+    descEl.value = b.description || "";
+    linkEl.value = b.link || "";
+    renderList();
+  }
+
+  function add(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    sol.specialBlocks.push({ name: "", description: "", link: "" });
+    currentIndex = sol.specialBlocks.length - 1;
+    dirty = true; changeList.push(`Added special block to ${sol.name || sol.id}`);
+    renderList(); selectIndex(currentIndex); renderDirty(); setStatus("Added a special block");
+  }
+
+  function move(idx, delta){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    const j = idx + delta;
+    if (j < 0 || j >= sol.specialBlocks.length) return;
+    const tmp = sol.specialBlocks[idx];
+    sol.specialBlocks[idx] = sol.specialBlocks[j];
+    sol.specialBlocks[j] = tmp;
+    dirty = true; changeList.push(`Reordered special blocks for ${sol.name || sol.id}`);
+    renderList(); renderDirty(); setStatus("Reordered special blocks");
+  }
+
+  // relaxed validation: allow blanks; only check link if present; prevent duplicate names if a name is given
+  function validateRelaxed(){
     const name = trim(nameEl.value);
     const description = trim(descEl.value);
     const link = trim(linkEl.value);
 
-    // If everything is empty, just close (optional block)
-    if (!name && !description && !link) {
-      closeModal();
-      return;
-    }
-
-    // Lightweight link check if provided
     if (link && !/^https?:\/\//i.test(link)) {
-      alert("Link must start with http:// or https:// (or leave it blank).");
-      return;
+      throw new Error("Link must start with http:// or https://");
     }
 
-    // Add as a new block (your HTML doesn't include an in-modal list to edit existing)
-    sol.specialBlocks.push({ name, description, link });
+    if (name) {
+      const sol = getCurrentSolution(); if (sol) {
+        ensureArray(sol);
+        const names = sol.specialBlocks.map((b,i)=> i===currentIndex ? name : (b?.name || ""));
+        const dups = names.filter((n,i)=> n && names.indexOf(n)!==i);
+        if (dups.length) throw new Error(`Duplicate block name "${dups[0]}" in this solution.`);
+      }
+    }
 
-    dirty = true;
-    changeList.push(`Added special block to ${sol.name || sol.id}`);
-    renderDirty();
-    setStatus("Added a special block");
-
-    closeModal();
+    return { name, description, link };
   }
 
-  // ---- Wire events ----
-  openBtn.addEventListener("click", openModal);
-  saveBtn && saveBtn.addEventListener("click", saveBlock);
-  cancelBtn && cancelBtn.addEventListener("click", closeModal);
-  backdrop && backdrop.addEventListener("click", closeModal);
+  function save(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    if (currentIndex < 0) { alert("Select a block (or click + Add)."); return; }
 
-  // Keep the temp list in sync when switching solutions or starting new
+    let rec;
+    try { rec = validateRelaxed(); }
+    catch(e){ alert(e.message); return; }
+
+    // If all fields are empty, remove the row (acts like "discard")
+    if (!rec.name && !rec.description && !rec.link) {
+      sol.specialBlocks.splice(currentIndex, 1);
+      currentIndex = -1;
+      clearForm();
+      renderList();
+      renderDirty();
+      setStatus("Empty special block discarded");
+      return;
+    }
+
+    sol.specialBlocks[currentIndex] = rec;
+    dirty = true; changeList.push(`Edited a special block for ${sol.name || sol.id}`);
+    renderList(); renderDirty(); setStatus("Saved special block");
+  }
+
+  function del(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    if (currentIndex < 0) return;
+    if (!confirm("Delete this special block?")) return;
+    sol.specialBlocks.splice(currentIndex,1);
+    currentIndex = -1;
+    clearForm();
+    dirty = true; changeList.push(`Deleted a special block from ${sol.name || sol.id}`);
+    renderList(); renderDirty(); setStatus("Deleted special block");
+  }
+
+  // Wire
+  openBtn.addEventListener("click", openModal);
+  backdrop && backdrop.addEventListener("click", closeModal);
+  closeBtn && closeBtn.addEventListener("click", closeModal);
+  addBtn && addBtn.addEventListener("click", add);
+  saveBtn && saveBtn.addEventListener("click", save);
+  delBtn && delBtn.addEventListener("click", del);
+
+  // Keep temp list in sync when switching solutions or starting new
   const _origLoad = window.loadSolutionIntoForm;
   if (typeof _origLoad === "function") {
     window.loadSolutionIntoForm = function (id) {
@@ -727,7 +819,6 @@ function cleanupAllSpecialBlocks(dataObj){
       window.currentFormSpecialBlocks = deepClone(s?.specialBlocks || []);
     };
   }
-
   if (window.newSolutionBtn) {
     window.newSolutionBtn.addEventListener("click", () => {
       window.currentFormSpecialBlocks = [];

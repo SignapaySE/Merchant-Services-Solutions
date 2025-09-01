@@ -166,31 +166,47 @@
     </section>
   </div>
 
-<!-- Special Blocks Modal (fields are OPTIONAL) -->
+<!-- Special Blocks Modal (list + edit pane; all fields OPTIONAL) -->
 <div id="specialBlocksModal" class="hidden fixed inset-0 z-50 items-center justify-center">
   <div class="absolute inset-0 bg-slate-900/70" id="sb_backdrop"></div>
-  <div class="relative w-full max-w-lg rounded-2xl bg-slate-900 p-5 ring-1 ring-slate-700 shadow-2xl">
-    <h3 class="text-lg font-semibold text-slate-100 mb-3" id="sb_title">Special block</h3>
 
-    <label class="block text-xs text-slate-300 mb-1" for="sb_name">Block name (optional)</label>
-    <input id="sb_name" type="text" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-3" placeholder="e.g., Payfac Lite" />
+  <div class="relative w-full max-w-3xl rounded-2xl bg-slate-900 p-5 ring-1 ring-slate-700 shadow-2xl max-h-[85vh] overflow-y-auto">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 id="sb_title" class="text-lg font-semibold text-slate-100">Special Blocks</h3>
+      <button type="button" id="sb_cancel" class="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm hover:bg-slate-700">Close</button>
+    </div>
 
-    <label class="block text-xs text-slate-300 mb-1" for="sb_desc">Description (optional)</label>
-    <textarea id="sb_desc" rows="3" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-3" placeholder="Short description"></textarea>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- Left column: list -->
+      <div class="md:col-span-2">
+        <div class="mb-2 flex items-center justify-between">
+          <div class="text-xs text-slate-300">Blocks in this solution</div>
+          <button id="sbAdd" type="button" class="rounded border border-emerald-700 bg-emerald-800/30 px-2 py-1 text-xs text-emerald-200 hover:bg-emerald-800">+ Add</button>
+        </div>
+        <div id="sbList" class="space-y-1"></div>
+        <p class="mt-2 text-[11px] text-slate-500">Click a block to edit. Use ↑/↓ to reorder.</p>
+      </div>
 
-    <label class="block text-xs text-slate-300 mb-1" for="sb_link">Product link (optional)</label>
-    <input id="sb_link" type="url" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-4" placeholder="https://…" />
+      <!-- Right column: edit form -->
+      <div class="md:col-span-3">
+        <label class="block text-xs text-slate-300 mb-1" for="sb_name">Block name (optional)</label>
+        <input id="sb_name" type="text" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-3" placeholder="e.g., Payfac Lite" />
 
-    <div class="flex justify-end gap-2">
-      <button id="sb_cancel" type="button" class="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm hover:bg-slate-700">Cancel</button>
-      <button id="sb_save" type="button" class="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">Save block</button>
+        <label class="block text-xs text-slate-300 mb-1" for="sb_desc">Description (optional)</label>
+        <textarea id="sb_desc" rows="4" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-3" placeholder="Short description"></textarea>
+
+        <label class="block text-xs text-slate-300 mb-1" for="sb_link">Product link (optional)</label>
+        <input id="sb_link" type="url" class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 mb-4" placeholder="https://…" />
+
+        <div class="flex justify-end gap-2">
+          <button id="sb_delete" type="button" class="rounded-md border border-red-700 text-red-300 bg-red-900/20 px-3 py-1.5 text-sm hover:bg-red-900/30">Delete</button>
+          <button id="sb_save"   type="button" class="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">Save block</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-    </div>
-  </div>
-</div>
 
 
   <script src="admin.js"></script>
