@@ -99,7 +99,7 @@ function makeTypeButton(label, icon) {
 function renderStep1() {
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
-  const map = { Restaurant: "🍽️", Retail: "🛍️" };
+  const map = { Restaurant: "🍽️", Retail: "🛍️", Service: "🛠️", Ecommerce: "🛒" };
   DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "💼")));
 }
 

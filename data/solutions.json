@@ -2,7 +2,9 @@
   "version": 1,
   "categories": [
     "Restaurant",
-    "Retail"
+    "Retail",
+    "Service"
+    "Ecommerce"
   ],
   "features": {
     "Restaurant": [
@@ -155,6 +157,74 @@
       {
         "id": "pci_r",
         "label": "PCI Compliance"
+      }
+    ],
+        "Service": [
+      {
+        "id": "online_booking",
+        "label": "Online booking"
+      },
+      {
+        "id": "invoices",
+        "label": "Invoices"
+      },
+      {
+        "id": "estimates",
+        "label": "Estimates/Quotes"
+      },
+      {
+        "id": "mobile_payments",
+        "label": "Mobile payments (on-site)"
+      },
+      {
+        "id": "subscriptions",
+        "label": "Recurring subscriptions"
+      },
+      {
+        "id": "tips",
+        "label": "Tips & gratuity"
+      },
+      {
+        "id": "tech_tracking",
+        "label": "Technician/Job tracking"
+      }
+    ],
+    "Ecommerce": [
+      {
+        "id": "online_catalog",
+        "label": "Online product catalog"
+      },
+      {
+        "id": "shopping_cart",
+        "label": "Shopping cart & checkout"
+      },
+      {
+        "id": "payments",
+        "label": "Online payments"
+      },
+      {
+        "id": "shipping",
+        "label": "Shipping labels & rates"
+      },
+      {
+        "id": "tax",
+        "label": "Sales tax/VAT"
+      },
+      {
+        "id": "inventory_sync",
+        "label": "Inventory sync (POS \u2194 online)"
+      },
+      {
+        "id": "discount_codes",
+        "label": "Discount/coupon codes"
+      },
+      {
+        "id": "abandoned_cart",
+        "label": "Abandoned cart recovery"
+      },
+      {
+        "id": "omnichannel",
+        "label": "Buy-online-pickup-in-store (BOPIS)"
       }
     ]
   },
@@ -354,6 +424,108 @@
           "name": "Dejavoo P3 (Wireless)",
           "description": "Handheld LTE/Wi-Fi \u00b7 EMV, NFC, built-in printer",
           "link": "https://dejavoo.io/products/p-terminals-family/p3/"
+        }
+      ]
+    },
+     {
+      "id": "fieldpro_pos",
+      "name": "FieldPro POS",
+      "category": "Service",
+      "tags": [
+        "mobile_payments",
+        "estimates",
+        "invoices",
+        "tips",
+        "tech_tracking"
+      ],
+      "summary": "Mobile-first POS for field services (HVAC, plumbing, contractors). Create estimates, convert to invoices, take payments on-site, and track technicians/jobs.",
+      "links": {
+        "site": "https://example.com/fieldpro"
+      },
+      "specialBlocks": [
+        {
+          "name": "Supported Hardware",
+          "description": "Bluetooth card readers and rugged Android/iOS devices for on-site payments.",
+          "link": "https://example.com/fieldpro/hardware"
+        },
+        {
+          "name": "Dispatch & Tracking",
+          "description": "Assign jobs, live location sharing for technicians, and status updates.",
+          "link": "https://example.com/fieldpro/dispatch"
+        }
+      ]
+    },
+    {
+      "id": "subscribio_billing",
+      "name": "Subscribio Billing",
+      "category": "Service",
+      "tags": [
+        "subscriptions",
+        "invoices",
+        "payments"
+      ],
+      "summary": "Simple recurring billing with invoice automation. Great for memberships, maintenance plans, and retainer services.",
+      "links": {
+        "site": "https://example.com/subscribio"
+      },
+      "specialBlocks": [
+        {
+          "name": "Dunning & Retries",
+          "description": "Automatic card retries, email reminders, and account updater to reduce churn.",
+          "link": "https://example.com/subscribio/dunning"
+        }
+      ]
+    },
+    {
+      "id": "shopswift",
+      "name": "ShopSwift",
+      "category": "Ecommerce",
+      "tags": [
+        "online_catalog",
+        "shopping_cart",
+        "payments",
+        "shipping",
+        "tax",
+        "discount_codes",
+        "abandoned_cart"
+      ],
+      "summary": "All\u2011in\u2011one ecommerce platform for small stores. Launch quickly with themes, secure checkout, and built\u2011in marketing tools.",
+      "links": {
+        "site": "https://example.com/shopswift"
+      },
+      "specialBlocks": [
+        {
+          "name": "Theme Store",
+          "description": "Customize storefront with modern templates and sections.",
+          "link": "https://example.com/shopswift/themes"
+        },
+        {
+          "name": "Marketing",
+          "description": "Email capture, discount codes, and abandoned\u2011cart recovery.",
+          "link": "https://example.com/shopswift/marketing"
+        }
+      ]
+    },
+    {
+      "id": "cartlite",
+      "name": "CartLite",
+      "category": "Ecommerce",
+      "tags": [
+        "online_catalog",
+        "shopping_cart",
+        "payments",
+        "inventory_sync",
+        "omnichannel"
+      ],
+      "summary": "Lightweight cart for businesses that already have a POS. Sync inventory and sell online with pickup or in\u2011store fulfillment.",
+      "links": {
+        "site": "https://example.com/cartlite"
+      },
+      "specialBlocks": [
+        {
+          "name": "POS Sync",
+          "description": "Two\u2011way inventory sync and order injection back to store POS.",
+          "link": "https://example.com/cartlite/pos-sync"
         }
       ]
     },
