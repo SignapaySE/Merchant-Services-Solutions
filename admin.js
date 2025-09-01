@@ -13,6 +13,22 @@ const adminUI = document.getElementById("adminUI");
 const enterBtn = document.getElementById("enterBtn");
 const pwInput = document.getElementById("pw");
 
+// Mode banner
+const solMode = document.getElementById("solMode");
+
+function setSolutionMode(mode, name=""){
+  if(mode === "new"){
+    solMode.textContent = "Mode: New Solution";
+    solMode.className = "mb-2 text-xs text-emerald-300";
+  } else if (mode === "edit"){
+    solMode.textContent = `Editing: ${name}`;
+    solMode.className = "mb-2 text-xs text-blue-300";
+  } else {
+    solMode.textContent = "";
+    solMode.className = "mb-2 text-xs text-neutral-400";
+  }
+}
+
 // Top bar
 const statusEl = document.getElementById("status");
 const lastLoadedEl = document.getElementById("lastLoaded");
@@ -79,12 +95,23 @@ discardBtn.addEventListener("click", () => {
 });
 saveAllBtn.addEventListener("click", () => {
   if (!dirty) { alert("No changes to save."); return; }
-  try { validateData(DATA, true); }
+
+  // 1) Work on a clone so UI state doesn't jump
+  const staged = deepClone(DATA);
+
+  // 2) Safety sweep: drop tags that don't exist in the solution's category; log what we changed
+  cleanseInvalidTagsAndLog(staged);
+
+  // 3) Validate the cleaned copy so you don't get blocked by old leftovers
+  try { validateData(staged, true); }
   catch (e) { alert("Fix validation issues before saving:\n" + e.message); return; }
+
+  // 4) Export
   if (!confirm("Save all staged changes and export an updated solutions.json?")) return;
-  downloadJSON(DATA, "solutions.json");
+  downloadJSON(staged, "solutions.json");
   setStatus("Exported updated solutions.json");
 });
+
 
 // ---------- Init ----------
 async function bootstrapFromServer(){
@@ -132,6 +159,9 @@ function hydrateUI(){
   renderSolutionsList();
   renderTagPicker();
   updateIdPreview();
+
+  // New: always start in "New Solution" mode until a solution is clicked
+  setSolutionMode("new");
 }
 
 // Features
@@ -306,20 +336,29 @@ solnCategoryFilter.addEventListener("change", ()=>{
 });
 
 function loadSolutionIntoForm(id){
-  const s = (DATA.solutions || []).find(x=>x.id===id); if(!s) return;
-  window.selectedSolutionId = s.id;
-  s_id.value=s.id;                 // hidden, immutable during edit
-  s_name.value=s.name||"";
-  s_category.value=s.category||DATA.categories?.[0]||"";
-  s_special.value=s.special_block||"";
-  s_summary.value=s.summary||"";
-  s_details.value=(Array.isArray(s.details)?s.details:[]).join("\n");
-  s_link_product.value=(s.links&&s.links.product)||"";
-  s_link_paper.value=(s.links&&s.links.paperwork)||"";
+  const s = (DATA.solutions || []).find(x => x.id === id);
+  if (!s) return;
+
+  window.selectedSolutionId = s.id;        // remember which one we're editing
+  s_id.value         = s.id || "";         // hidden, stable id
+  s_name.value       = s.name || "";
+  s_category.value   = s.category || DATA.categories?.[0] || "";
+  s_special.value    = s.special_block || "";
+  s_summary.value    = s.summary || "";
+  s_details.value    = (Array.isArray(s.details) ? s.details : []).join("\n");
+  s_link_product.value = (s.links && s.links.product) || "";
+  s_link_paper.value   = (s.links && s.links.paperwork) || "";
+
   renderTagPicker();
-  const current = new Set(s.tags||[]);
-  [...tagPicker.querySelectorAll("input[type=checkbox]")].forEach(cb=>cb.checked=current.has(cb.value));
+  const current = new Set(s.tags || []);
+  [...tagPicker.querySelectorAll("input[type=checkbox]")].forEach(cb => {
+    cb.checked = current.has(cb.value);
+  });
+
+  // Show we're editing something
+  setSolutionMode("edit", s.name || "");
 }
+
 
 function renderTagPicker(){
   tagPicker.innerHTML = "";
@@ -347,25 +386,44 @@ newSolutionBtn.addEventListener("click", ()=>{
   s_link_product.value = "";
   s_link_paper.value = "";
   renderTagPicker();
+
+   // Show we're creating a new one
+  setSolutionMode("new");
 });
 
 // Add/Update/Delete Solution
-saveSolutionBtn.addEventListener("click", e=>{
+saveSolutionBtn.addEventListener("click", (e)=>{
   e.preventDefault();
-  try{
+
+  // If we loaded an existing solution but the hidden id is empty, preserve it
+  if (window.selectedSolutionId && !s_id.value) {
+    s_id.value = window.selectedSolutionId;
+  }
+
+  try {
     const s = collectSolutionFromForm();
-    const exists = (DATA.solutions||[]).find(x=>x.id===s.id);
+    const exists = (DATA.solutions || []).find(x => x.id === s.id);
     const verb = exists ? "Update" : "Add";
-    // Confirm ONLY if updating
+
+    // Confirm ONLY when updating existing
     if (exists) {
       if (!confirm(`Update this existing solution?\n\n${s.name}`)) return;
     }
+
     upsertSolution(s);
     renderSolutionsList();
+
+    // After saving, we’re clearly editing this record
+    window.selectedSolutionId = s.id;
+    setSolutionMode("edit", s.name);
+
     markDirty(`${verb} solution`);
     setStatus(`Solution ${verb.toLowerCase()} staged`);
-  } catch(err){ alert(err.message); }
+  } catch (err) {
+    alert(err.message);
+  }
 });
+
 
 deleteSolutionBtn.addEventListener("click", ()=>{
   const id = sTrim(s_id.value); if(!id) return alert("Load a solution first (click it in the list).");
@@ -454,6 +512,23 @@ function validateData(obj, strict=false){
     seenSol.add(s.id);
   });
 }
+function cleanseInvalidTagsAndLog(data){
+  const msgs = [];
+  (data.solutions || []).forEach(sol => {
+    const allowed = new Set(((data.features || {})[sol.category] || []).map(f => f.id));
+    const before = Array.isArray(sol.tags) ? [...sol.tags] : [];
+    sol.tags = before.filter(t => allowed.has(t));
+    const removed = before.filter(t => !sol.tags.includes(t));
+    if (removed.length){
+      msgs.push(`Auto-removed invalid tag(s) [${removed.join(", ")}] from "${sol.name}" (${sol.category})`);
+    }
+  });
+  if (msgs.length){
+    changeList.push(...msgs);
+    renderDirty();
+  }
+}
+
 function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
 function sTrim(v){ return String(v||"").trim(); }
 function downloadJSON(obj, filename){
