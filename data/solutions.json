@@ -1,113 +1,384 @@
 {
   "version": 1,
-  "categories": ["Restaurant", "Retail"],
+  "categories": [
+    "Restaurant",
+    "Retail"
+  ],
   "features": {
     "Restaurant": [
-      {"id":"tips","label":"Tips"},
-      {"id":"table_service","label":"Table Service"},
-      {"id":"counter_service","label":"Counter Service"},
-      {"id":"reservations","label":"Reservations"},
-      {"id":"online_ordering","label":"Online Ordering"},
-      {"id":"qr_code","label":"QR Code Ordering"},
-      {"id":"kitchen_printer","label":"Kitchen Printer Integration"},
-      {"id":"inventory_mgmt","label":"Inventory Management"},
-      {"id":"loyalty","label":"Loyalty Programs"},
-      {"id":"gift_cards","label":"Gift Cards"},
-      {"id":"cust_display","label":"Customer Display"},
-      {"id":"employee_mgmt","label":"Employee Management"},
-      {"id":"labor_mgmt","label":"Labor Management"},
-      {"id":"analytics","label":"Reporting & Analytics"},
-      {"id":"mobile_pay","label":"Mobile Payments"},
-      {"id":"pay_at_table","label":"Pay-at-Table"},
-      {"id":"site_builder","label":"Website Builder"},
-      {"id":"app_market","label":"App Marketplace"},
-      {"id":"payroll","label":"Payroll Integration"},
-      {"id":"emv","label":"EMV Chip & PIN"},
-      {"id":"contactless","label":"Contactless Payments"},
-      {"id":"wifi","label":"Wi-Fi / Wireless"},
-      {"id":"receipt_print","label":"Receipt Printing"},
-      {"id":"pci","label":"PCI Compliance"},
-      {"id":"terminal_simple","label":"Terminal Simplicity"}
+      {
+        "id": "tips",
+        "label": "Tips"
+      },
+      {
+        "id": "table_service",
+        "label": "Table Service"
+      },
+      {
+        "id": "counter_service",
+        "label": "Counter Service"
+      },
+      {
+        "id": "reservations",
+        "label": "Reservations"
+      },
+      {
+        "id": "online_ordering",
+        "label": "Online Ordering"
+      },
+      {
+        "id": "qr_code",
+        "label": "QR Code Ordering"
+      },
+      {
+        "id": "kitchen_printer",
+        "label": "Kitchen Printer Integration"
+      },
+      {
+        "id": "inventory_mgmt",
+        "label": "Inventory Management"
+      },
+      {
+        "id": "loyalty",
+        "label": "Loyalty Programs"
+      },
+      {
+        "id": "gift_cards",
+        "label": "Gift Cards"
+      },
+      {
+        "id": "cust_display",
+        "label": "Customer Display"
+      },
+      {
+        "id": "employee_mgmt",
+        "label": "Employee Management"
+      },
+      {
+        "id": "labor_mgmt",
+        "label": "Labor Management"
+      },
+      {
+        "id": "analytics",
+        "label": "Reporting & Analytics"
+      },
+      {
+        "id": "mobile_pay",
+        "label": "Mobile Payments"
+      },
+      {
+        "id": "pay_at_table",
+        "label": "Pay-at-Table"
+      },
+      {
+        "id": "site_builder",
+        "label": "Website Builder"
+      },
+      {
+        "id": "app_market",
+        "label": "App Marketplace"
+      },
+      {
+        "id": "payroll",
+        "label": "Payroll Integration"
+      },
+      {
+        "id": "emv",
+        "label": "EMV Chip & PIN"
+      },
+      {
+        "id": "contactless",
+        "label": "Contactless Payments"
+      },
+      {
+        "id": "wifi",
+        "label": "Wi-Fi / Wireless"
+      },
+      {
+        "id": "receipt_print",
+        "label": "Receipt Printing"
+      },
+      {
+        "id": "pci",
+        "label": "PCI Compliance"
+      },
+      {
+        "id": "terminal_simple",
+        "label": "Terminal Simplicity"
+      }
     ],
     "Retail": [
-      {"id":"inventory","label":"Inventory"},
-      {"id":"barcode","label":"Barcode Scanning"},
-      {"id":"cust_display_r","label":"Customer Display"},
-      {"id":"discounts","label":"Discounts"},
-      {"id":"po","label":"Purchase Orders"},
-      {"id":"gift_cards_r","label":"Gift Cards"},
-      {"id":"loyalty_r","label":"Loyalty"},
-      {"id":"cash_drawer","label":"Cash Drawer"},
-      {"id":"analytics_r","label":"Reporting & Analytics"},
-      {"id":"pin_debit","label":"PIN Debit"},
-      {"id":"dual_pricing","label":"Dual Pricing"},
-      {"id":"pci_r","label":"PCI Compliance"}
+      {
+        "id": "inventory",
+        "label": "Inventory"
+      },
+      {
+        "id": "barcode",
+        "label": "Barcode Scanning"
+      },
+      {
+        "id": "cust_display_r",
+        "label": "Customer Display"
+      },
+      {
+        "id": "discounts",
+        "label": "Discounts"
+      },
+      {
+        "id": "po",
+        "label": "Purchase Orders"
+      },
+      {
+        "id": "gift_cards_r",
+        "label": "Gift Cards"
+      },
+      {
+        "id": "loyalty_r",
+        "label": "Loyalty"
+      },
+      {
+        "id": "cash_drawer",
+        "label": "Cash Drawer"
+      },
+      {
+        "id": "analytics_r",
+        "label": "Reporting & Analytics"
+      },
+      {
+        "id": "pin_debit",
+        "label": "PIN Debit"
+      },
+      {
+        "id": "dual_pricing",
+        "label": "Dual Pricing"
+      },
+      {
+        "id": "pci_r",
+        "label": "PCI Compliance"
+      }
     ]
   },
   "solutions": [
     {
-      "id":"clover",
-      "name":"Clover POS",
-      "category":"Restaurant",
-      "tags":["tips","table_service","counter_service","reservations","online_ordering","inventory_mgmt","loyalty","gift_cards","cust_display","employee_mgmt","analytics","mobile_pay","payroll","app_market","pci"],
-      "summary":"Customizable all-in-one POS system with hardware options, app marketplace, and robust tools for restaurants.",
-      "details":["Tableside or counter workflows","App marketplace","Hardware options"],
-      "links":{"product":"https://www.clover.com","paperwork":"https://www.zoho.com"}
+      "id": "clover",
+      "name": "Clover POS",
+      "category": "Restaurant",
+      "tags": [
+        "tips",
+        "table_service",
+        "counter_service",
+        "reservations",
+        "online_ordering",
+        "inventory_mgmt",
+        "loyalty",
+        "gift_cards",
+        "cust_display",
+        "employee_mgmt",
+        "analytics",
+        "mobile_pay",
+        "payroll",
+        "app_market",
+        "pci"
+      ],
+      "summary": "Customizable all-in-one POS system with hardware options, app marketplace, and robust tools for restaurants.",
+      "details": [
+        "Tableside or counter workflows",
+        "App marketplace",
+        "Hardware options"
+      ],
+      "links": {
+        "product": "https://www.clover.com",
+        "paperwork": "https://www.zoho.com"
+      }
     },
     {
-      "id":"skytab",
-      "name":"SkyTab POS",
-      "category":"Restaurant",
-      "tags":["tips","table_service","reservations","online_ordering","qr_code","kitchen_printer","inventory_mgmt","loyalty","gift_cards","cust_display","labor_mgmt","analytics","pay_at_table","site_builder","pci"],
-      "summary":"Modern restaurant POS with built-in online ordering, reservations, QR code payments, and pay-at-the-table.",
-      "details":["KDS","Menu management","Online ordering"],
-      "links":{"product":"https://www.skytab.com","paperwork":"https://www.zoho.com"}
+      "id": "skytab",
+      "name": "SkyTab POS",
+      "category": "Restaurant",
+      "tags": [
+        "tips",
+        "table_service",
+        "reservations",
+        "online_ordering",
+        "qr_code",
+        "kitchen_printer",
+        "inventory_mgmt",
+        "loyalty",
+        "gift_cards",
+        "cust_display",
+        "labor_mgmt",
+        "analytics",
+        "pay_at_table",
+        "site_builder",
+        "pci"
+      ],
+      "summary": "Modern restaurant POS with built-in online ordering, reservations, QR code payments, and pay-at-the-table.",
+      "details": [
+        "KDS",
+        "Menu management",
+        "Online ordering"
+      ],
+      "links": {
+        "product": "https://www.skytab.com",
+        "paperwork": "https://www.zoho.com"
+      }
     },
     {
-      "id":"signapay-terminals",
-      "name":"SignaPay SE Desktop Terminals",
-      "category":"Restaurant",
-      "tags":["counter_service","mobile_pay","emv","contactless","wifi","terminal_simple","receipt_print"],
-      "summary":"Countertop and wireless credit card terminals (Valor 100, Dejavoo QD4, PAX A80, Dejavoo P3) for secure restaurant payments.",
-      "details":["Secure EMV/NFC","Simple operation"],
-      "links":{"product":"https://www.signapayse.com","paperwork":"https://www.zoho.com"},
-      "special_block":"terminalDetails"
+      "id": "signapay-terminals",
+      "name": "SignaPay SE Desktop Terminals",
+      "category": "Restaurant",
+      "tags": [
+        "counter_service",
+        "mobile_pay",
+        "emv",
+        "contactless",
+        "wifi",
+        "terminal_simple",
+        "receipt_print"
+      ],
+      "summary": "Countertop and wireless credit card terminals (Valor 100, Dejavoo QD4, PAX A80, Dejavoo P3) for secure restaurant payments.",
+      "details": [
+        "Secure EMV/NFC",
+        "Simple operation"
+      ],
+      "links": {
+        "product": "https://www.signapayse.com",
+        "paperwork": "https://www.zoho.com"
+      },
+      "special_block": "terminalDetails",
+      "specialBlocks": [
+        {
+          "name": "Valor VL100 / VL100 Pro",
+          "description": "Countertop \u00b7 EMV, NFC, Wi-Fi/Ethernet",
+          "link": "https://valorpaytech.com/what-we-do/hardware-products/countertop-pos/vl100-pro/"
+        },
+        {
+          "name": "Dejavoo QD4",
+          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "link": "https://dejavoo.io/products/qd-terminals-family/qd4/"
+        },
+        {
+          "name": "PAX A80",
+          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "link": "https://www.paxtechnology.com/a80"
+        },
+        {
+          "name": "Dejavoo P3 (Wireless)",
+          "description": "Handheld LTE/Wi-Fi \u00b7 EMV, NFC, built-in printer",
+          "link": "https://dejavoo.io/products/p-terminals-family/p3/"
+        }
+      ]
     },
     {
-      "id":"shift4-terminals",
-      "name":"Shift4 Desktop Terminals",
-      "category":"Restaurant",
-      "tags":["counter_service","emv","contactless","pci","receipt_print","terminal_simple"],
-      "summary":"Countertop payment terminals from Shift4 offering secure EMV, NFC contactless, and reliable processing for restaurants.",
-      "links":{"product":"https://www.shift4network.com/credit-card-terminals/","paperwork":"https://www.zoho.com"},
-      "special_block":"shift4Details"
+      "id": "shift4-terminals",
+      "name": "Shift4 Desktop Terminals",
+      "category": "Restaurant",
+      "tags": [
+        "counter_service",
+        "emv",
+        "contactless",
+        "pci",
+        "receipt_print",
+        "terminal_simple"
+      ],
+      "summary": "Countertop payment terminals from Shift4 offering secure EMV, NFC contactless, and reliable processing for restaurants.",
+      "links": {
+        "product": "https://www.shift4network.com/credit-card-terminals/",
+        "paperwork": "https://www.zoho.com"
+      },
+      "special_block": "shift4Details",
+      "specialBlocks": [
+        {
+          "name": "Countertop EMV/NFC terminals",
+          "description": "Secure EMV chip, PIN, contactless, receipt printing",
+          "link": "https://www.shift4network.com/credit-card-terminals/"
+        }
+      ]
     },
-
     {
-      "id":"clover-retail",
-      "name":"Clover POS",
-      "category":"Retail",
-      "tags":["inventory","barcode","cust_display_r","discounts","po","gift_cards_r","loyalty_r","cash_drawer","analytics_r","pin_debit","dual_pricing","pci_r"],
-      "summary":"Clover POS for retail provides inventory management, barcode scanning, loyalty, and integrated payments for stores.",
-      "links":{"product":"https://www.clover.com","paperwork":"https://www.zoho.com"}
+      "id": "clover-retail",
+      "name": "Clover POS",
+      "category": "Retail",
+      "tags": [
+        "inventory",
+        "barcode",
+        "cust_display_r",
+        "discounts",
+        "po",
+        "gift_cards_r",
+        "loyalty_r",
+        "cash_drawer",
+        "analytics_r",
+        "pin_debit",
+        "dual_pricing",
+        "pci_r"
+      ],
+      "summary": "Clover POS for retail provides inventory management, barcode scanning, loyalty, and integrated payments for stores.",
+      "links": {
+        "product": "https://www.clover.com",
+        "paperwork": "https://www.zoho.com"
+      }
     },
     {
-      "id":"signapay-retail-terminals",
-      "name":"SignaPay SE Desktop Terminals",
-      "category":"Retail",
-      "tags":["pin_debit", "dual_pricing", "pci_r"],
-      "summary":"Secure countertop and wireless payment terminals for retail stores supporting EMV, NFC, and simple card acceptance.",
-      "links":{"product":"https://www.signapayse.com","paperwork":"https://www.zoho.com"},
-      "special_block":"terminalDetails"
+      "id": "signapay-retail-terminals",
+      "name": "SignaPay SE Desktop Terminals",
+      "category": "Retail",
+      "tags": [
+        "pin_debit",
+        "dual_pricing",
+        "pci_r"
+      ],
+      "summary": "Secure countertop and wireless payment terminals for retail stores supporting EMV, NFC, and simple card acceptance.",
+      "links": {
+        "product": "https://www.signapayse.com",
+        "paperwork": "https://www.zoho.com"
+      },
+      "special_block": "terminalDetails",
+      "specialBlocks": [
+        {
+          "name": "Valor VL100 / VL100 Pro",
+          "description": "Countertop \u00b7 EMV, NFC, Wi-Fi/Ethernet",
+          "link": "https://valorpaytech.com/what-we-do/hardware-products/countertop-pos/vl100-pro/"
+        },
+        {
+          "name": "Dejavoo QD4",
+          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "link": "https://dejavoo.io/products/qd-terminals-family/qd4/"
+        },
+        {
+          "name": "PAX A80",
+          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "link": "https://www.paxtechnology.com/a80"
+        },
+        {
+          "name": "Dejavoo P3 (Wireless)",
+          "description": "Handheld LTE/Wi-Fi \u00b7 EMV, NFC, built-in printer",
+          "link": "https://dejavoo.io/products/p-terminals-family/p3/"
+        }
+      ]
     },
     {
-      "id":"shift4-retail-terminals",
-      "name":"Shift4 Desktop Terminals",
-      "category":"Retail",
-      "tags":["pin_debit", "dual_pricing", "pci_r"],
-      "summary":"Shift4 retail terminals provide reliable card acceptance with EMV, contactless payments, and PCI compliant processing.",
-      "links":{"product":"https://www.shift4network.com/credit-card-terminals/","paperwork":"https://www.zoho.com"},
-      "special_block":"shift4Details"
+      "id": "shift4-retail-terminals",
+      "name": "Shift4 Desktop Terminals",
+      "category": "Retail",
+      "tags": [
+        "pin_debit",
+        "dual_pricing",
+        "pci_r"
+      ],
+      "summary": "Shift4 retail terminals provide reliable card acceptance with EMV, contactless payments, and PCI compliant processing.",
+      "links": {
+        "product": "https://www.shift4network.com/credit-card-terminals/",
+        "paperwork": "https://www.zoho.com"
+      },
+      "special_block": "shift4Details",
+      "specialBlocks": [
+        {
+          "name": "Countertop EMV/NFC terminals",
+          "description": "Secure EMV chip, PIN, contactless, receipt printing",
+          "link": "https://www.shift4network.com/credit-card-terminals/"
+        }
+      ]
     }
   ]
 }

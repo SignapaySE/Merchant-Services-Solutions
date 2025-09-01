@@ -127,6 +127,17 @@
               </select>
             </details>
 
+            <div class="mt-2">
+  <button id="openSpecialBlocks" type="button"
+          class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800 text-xs">
+    Special Blocks
+  </button>
+  <p class="mt-1 text-[11px] text-neutral-400">
+    Add/edit named blocks (name, description, link). They show in the solution modal.
+  </p>
+</div>
+
+
             <div class="sm:col-span-2"><label class="block text-xs mb-1">Summary</label>
               <input id="s_summary" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
             </div>
@@ -162,6 +173,49 @@
       </div>
     </section>
   </div>
+
+<!-- Special Blocks Modal -->
+<div id="specialBlocksModal" class="hidden fixed inset-0 z-50 items-center justify-center">
+  <div id="specialBlocksBackdrop" class="absolute inset-0 bg-black/70"></div>
+  <div class="relative z-10 w-[95vw] max-w-4xl rounded-2xl border border-neutral-800 bg-neutral-950 p-4 shadow-xl">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h3 id="sbTitle" class="text-base font-semibold">Special Blocks</h3>
+      <button id="sbClose" class="rounded bg-neutral-800 px-3 py-1 text-xs hover:bg-neutral-700">Close</button>
+    </div>
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+      <!-- Left: list -->
+      <div class="md:col-span-1 rounded-xl border border-neutral-800 p-3">
+        <div class="mb-2 flex items-center justify-between">
+          <div class="text-xs text-neutral-400">Blocks</div>
+          <button id="sbAdd" class="rounded border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-800">+ Add</button>
+        </div>
+        <div id="sbList" class="max-h-72 overflow-auto space-y-1"></div>
+      </div>
+      <!-- Right: form -->
+      <div class="md:col-span-2 rounded-xl border border-neutral-800 p-3">
+        <div class="grid grid-cols-1 gap-2">
+          <div>
+            <label class="block text-xs mb-1">Block Name</label>
+            <input id="sbName" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
+          </div>
+          <div>
+            <label class="block text-xs mb-1">Description</label>
+            <textarea id="sbDescription" rows="5" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs mb-1">Product Link (optional)</label>
+            <input id="sbLink" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" placeholder="https://..." />
+          </div>
+          <div class="flex items-center gap-2 pt-2">
+            <button id="sbSave" class="rounded bg-emerald-600 px-3 py-2 text-xs hover:bg-emerald-500">Save Block</button>
+            <button id="sbDelete" class="rounded border border-red-700 px-3 py-2 text-xs text-red-300 hover:bg-red-900/30">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <script src="admin.js"></script>
 </body>

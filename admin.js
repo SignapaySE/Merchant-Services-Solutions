@@ -569,3 +569,167 @@ function uniqueSolutionId(base){
   while (list.some(s => s.id === id)) id = `${base}_${n++}`;
   return id;
 }
+/* ===== Special Blocks (Advanced) ===== */
+(function(){
+  const advBtn = document.getElementById("openSpecialBlocks");
+  if (!advBtn) return;
+  const modal = document.getElementById("specialBlocksModal");
+  const backdrop = document.getElementById("specialBlocksBackdrop");
+  const closeBtn = document.getElementById("sbClose");
+  const title = document.getElementById("sbTitle");
+  const list = document.getElementById("sbList");
+  const addBtn = document.getElementById("sbAdd");
+  const nameEl = document.getElementById("sbName");
+  const descEl = document.getElementById("sbDescription");
+  const linkEl = document.getElementById("sbLink");
+  const saveBtn = document.getElementById("sbSave");
+  const delBtn = document.getElementById("sbDelete");
+
+  let currentIndex = -1; // index into solution.specialBlocks
+
+  function getCurrentSolution(){
+    const id = window.selectedSolutionId || window.currentSolutionId || window.state?.currentSolutionId || null;
+    if (!id) return null;
+    return (DATA.solutions || []).find(s => s.id === id) || null;
+  }
+
+  function ensureArray(sol){
+    if (!sol.specialBlocks) sol.specialBlocks = [];
+    if (!Array.isArray(sol.specialBlocks)) sol.specialBlocks = [];
+  }
+
+  function openModal(){
+    const sol = getCurrentSolution();
+    if (!sol) { alert("Select a solution first."); return; }
+    ensureArray(sol);
+    title.textContent = `Special Blocks — ${sol.name || sol.id}`;
+    currentIndex = -1;
+    renderList();
+    clearForm();
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.documentElement.classList.add("scroll-lock");
+    document.body.classList.add("scroll-lock");
+  }
+
+  function closeModal(){
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.documentElement.classList.remove("scroll-lock");
+    document.body.classList.remove("scroll-lock");
+  }
+
+  function renderList(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    list.innerHTML = "";
+    sol.specialBlocks.forEach((b, idx) => {
+      const row = document.createElement("div");
+      row.className = "group flex items-center justify-between gap-2 rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-900" + (idx===currentIndex?" ring-1 ring-emerald-500": "");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flex-1 text-left truncate";
+      btn.textContent = b?.name || `(Untitled ${idx+1})`;
+      btn.addEventListener("click", ()=>selectIndex(idx));
+      const controls = document.createElement("div");
+      controls.className = "flex items-center gap-1";
+      const up = document.createElement("button");
+      up.type = "button"; up.title = "Move up";
+      up.className = "rounded border border-neutral-700 px-1 py-0.5 hover:bg-neutral-800";
+      up.textContent = "↑";
+      up.addEventListener("click", (e)=>{ e.stopPropagation(); move(idx,-1); });
+      const down = document.createElement("button");
+      down.type = "button"; down.title = "Move down";
+      down.className = "rounded border border-neutral-700 px-1 py-0.5 hover:bg-neutral-800";
+      down.textContent = "↓";
+      down.addEventListener("click", (e)=>{ e.stopPropagation(); move(idx,1); });
+      controls.appendChild(up); controls.appendChild(down);
+      row.appendChild(btn); row.appendChild(controls);
+      list.appendChild(row);
+    });
+  }
+
+  function selectIndex(idx){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    currentIndex = idx;
+    const b = sol.specialBlocks[idx];
+    nameEl.value = b?.name || "";
+    descEl.value = b?.description || "";
+    linkEl.value = b?.link || "";
+    renderList();
+  }
+
+  function clearForm(){
+    nameEl.value = "";
+    descEl.value = "";
+    linkEl.value = "";
+  }
+
+  function add(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    sol.specialBlocks.push({ name: "", description: "", link: "" });
+    currentIndex = sol.specialBlocks.length - 1;
+    dirty = true; changeList.push(`Added special block to ${sol.name}`);
+    renderList(); selectIndex(currentIndex); renderDirty(); setStatus("Added a special block");
+  }
+
+  function move(idx, delta){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    const j = idx + delta;
+    if (j < 0 || j >= sol.specialBlocks.length) return;
+    const tmp = sol.specialBlocks[idx];
+    sol.specialBlocks[idx] = sol.specialBlocks[j];
+    sol.specialBlocks[j] = tmp;
+    dirty = true; changeList.push(`Reordered special blocks for ${sol.name}`);
+    renderList(); renderDirty(); setStatus("Reordered special blocks");
+  }
+
+  function validate(){
+    const name = nameEl.value.trim();
+    const desc = descEl.value.trim();
+    const link = linkEl.value.trim();
+    if (!name) throw new Error("Block Name is required.");
+    if (!desc) throw new Error("Description is required.");
+    if (link && !/^https?:\\/\\//i.test(link)) throw new Error("Link must start with http:// or https://");
+    // duplicates
+    const sol = getCurrentSolution(); if(!sol) return;
+    const names = sol.specialBlocks.map((b,i)=> i===currentIndex ? name : (b?.name||""));
+    const dups = names.filter((n,i)=>n && names.indexOf(n)!==i);
+    if (dups.length) throw new Error(`Duplicate block name "${dups[0]}" in this solution.`);
+    return { name, description: desc, link };
+  }
+
+  function save(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    if (currentIndex < 0) { alert("Select a block (or click + Add)."); return; }
+    let val;
+    try { val = validate(); }
+    catch(e){ alert(e.message); return; }
+    sol.specialBlocks[currentIndex] = val;
+    dirty = true; changeList.push(`Edited a special block for ${sol.name}`);
+    renderList(); renderDirty(); setStatus("Saved special block");
+  }
+
+  function del(){
+    const sol = getCurrentSolution(); if(!sol) return;
+    ensureArray(sol);
+    if (currentIndex < 0) return;
+    if (!confirm("Delete this special block?")) return;
+    sol.specialBlocks.splice(currentIndex,1);
+    currentIndex = -1;
+    clearForm();
+    dirty = true; changeList.push(`Deleted a special block from ${sol.name}`);
+    renderList(); renderDirty(); setStatus("Deleted special block");
+  }
+
+  advBtn.addEventListener("click", openModal);
+  backdrop.addEventListener("click", closeModal);
+  closeBtn.addEventListener("click", closeModal);
+  addBtn.addEventListener("click", add);
+  saveBtn.addEventListener("click", save);
+  delBtn.addEventListener("click", del);
+})();

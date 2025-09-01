@@ -45,6 +45,15 @@ const modalMisses = document.getElementById('modalMisses');
 const allFeatures = document.getElementById('allFeatures');
 const terminalDetails = document.getElementById('terminalDetails');
 const shift4Details = document.getElementById('shift4Details');
+const specialBlocksSection = document.getElementById('specialBlocksSection');
+const specialBlocksList = document.getElementById('specialBlocksList');
+
+function escapeHTML(s){ 
+  return String(s ?? "").replace(/[&<>\"']/g, m => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]
+  )); 
+}
+
 
 /* ===== Rendering ===== */
 function renderStepper() {
@@ -224,10 +233,26 @@ function openAnalysis(item) {
     `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${featLabels[t]||t}</span>`
   ).join("");
 
+  // Special Blocks (data-driven)
+if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
+  specialBlocksList.innerHTML = item.specialBlocks.map(b => `
+    <li class="rounded-lg border border-slate-700 p-3 text-sm">
+      <div class="font-medium">${escapeHTML(b.name)}</div>
+      <div class="text-xs text-slate-400">${escapeHTML(b.description)}</div>
+      ${b.link ? `<a href="${escapeHTML(b.link)}" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">View product ↗</a>` : ``}
+    </li>
+  `).join("");
+  specialBlocksSection.classList.remove('hidden');
+} else {
+  specialBlocksSection.classList.add('hidden');
+  specialBlocksList.innerHTML = "";
+}
+
+// Hide old hardcoded blocks (now superseded)
+
+
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
-  if (item.special_block === "terminalDetails") terminalDetails.classList.remove('hidden');
-  if (item.special_block === "shift4Details") shift4Details.classList.remove('hidden');
 
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.documentElement.classList.add('scroll-lock');
