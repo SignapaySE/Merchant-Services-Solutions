@@ -1,4 +1,4 @@
-const ADMIN_PASSWORD = "letmein123"; // change this
+const ADMIN_PASSWORD = "letmein123"; // change me
 const REPO_DATA_URL = "data/solutions.json";
 
 // Originals vs working copy
@@ -13,22 +13,6 @@ const adminUI = document.getElementById("adminUI");
 const enterBtn = document.getElementById("enterBtn");
 const pwInput = document.getElementById("pw");
 
-// Mode banner
-const solMode = document.getElementById("solMode");
-
-function setSolutionMode(mode, name=""){
-  if(mode === "new"){
-    solMode.textContent = "Mode: New Solution";
-    solMode.className = "mb-2 text-xs text-emerald-300";
-  } else if (mode === "edit"){
-    solMode.textContent = `Editing: ${name}`;
-    solMode.className = "mb-2 text-xs text-blue-300";
-  } else {
-    solMode.textContent = "";
-    solMode.className = "mb-2 text-xs text-neutral-400";
-  }
-}
-
 // Top bar
 const statusEl = document.getElementById("status");
 const lastLoadedEl = document.getElementById("lastLoaded");
@@ -38,6 +22,10 @@ const discardBtn = document.getElementById("discardBtn");
 const saveAllBtn = document.getElementById("saveAllBtn");
 const changeLogWrap = document.getElementById("changeLogWrap");
 const changeLog = document.getElementById("changeLog");
+
+// Preview buttons
+const previewBtn = document.getElementById("previewBtn");
+const clearPreviewBtn = document.getElementById("clearPreviewBtn");
 
 // Features UI
 const categoryList = document.getElementById("categoryList");
@@ -67,6 +55,21 @@ const tagPicker = document.getElementById("tagPicker");
 const newSolutionBtn = document.getElementById("newSolutionBtn");
 const saveSolutionBtn = document.getElementById("saveSolutionBtn");
 const deleteSolutionBtn = document.getElementById("deleteSolutionBtn");
+
+// ---- Mode banner (NEW) ----
+const solMode = document.getElementById("solMode");
+function setSolutionMode(mode, name = "") {
+  if (mode === "new") {
+    solMode.textContent = "Mode: New Solution";
+    solMode.className = "mb-2 text-xs text-emerald-300";
+  } else if (mode === "edit") {
+    solMode.textContent = `Editing: ${name}`;
+    solMode.className = "mb-2 text-xs text-blue-300";
+  } else {
+    solMode.textContent = "";
+    solMode.className = "mb-2 text-xs text-neutral-400";
+  }
+}
 
 // ---------- Gate ----------
 enterBtn.addEventListener("click", async () => {
@@ -112,6 +115,23 @@ saveAllBtn.addEventListener("click", () => {
   setStatus("Exported updated solutions.json");
 });
 
+// Preview: save to localStorage so the main app uses it in THIS browser
+previewBtn.addEventListener('click', () => {
+  const staged = deepClone(DATA);
+  cleanseInvalidTagsAndLog(staged);
+  try { validateData(staged, true); }
+  catch (e) { alert("Fix validation issues before previewing:\n" + e.message); return; }
+  localStorage.setItem('solutions_preview_enabled', '1');
+  localStorage.setItem('solutions_preview_data', JSON.stringify(staged));
+  setStatus("Preview enabled for this browser. Open the main app and refresh.");
+  alert("Preview saved.\nOpen the main app in THIS browser and refresh to see your changes.");
+});
+clearPreviewBtn.addEventListener('click', () => {
+  localStorage.removeItem('solutions_preview_enabled');
+  localStorage.removeItem('solutions_preview_data');
+  setStatus("Preview cleared for this browser.");
+  alert("Preview cleared.\nThe main app will use the live data file again after refresh.");
+});
 
 // ---------- Init ----------
 async function bootstrapFromServer(){
@@ -160,7 +180,7 @@ function hydrateUI(){
   renderTagPicker();
   updateIdPreview();
 
-  // New: always start in "New Solution" mode until a solution is clicked
+  // start in "New Solution" mode until a solution is clicked
   setSolutionMode("new");
 }
 
@@ -245,7 +265,7 @@ addFeatBtn.addEventListener("click", e=>{
   setStatus("New feature staged");
 });
 
-// Rename selected (confirm because it changes existing)
+// Rename selected (confirm)
 renameFeatBtn.addEventListener("click", ()=>{
   if(!window.activeCategory) return alert("Select a category.");
   const id = sTrim(selectedFeatId.value); if(!id) return alert("Select a feature to rename.");
@@ -359,7 +379,6 @@ function loadSolutionIntoForm(id){
   setSolutionMode("edit", s.name || "");
 }
 
-
 function renderTagPicker(){
   tagPicker.innerHTML = "";
   const cat = s_category.value || window.activeCategory || DATA.categories?.[0];
@@ -387,7 +406,7 @@ newSolutionBtn.addEventListener("click", ()=>{
   s_link_paper.value = "";
   renderTagPicker();
 
-   // Show we're creating a new one
+  // Show we're creating a new one
   setSolutionMode("new");
 });
 
@@ -400,9 +419,9 @@ saveSolutionBtn.addEventListener("click", (e)=>{
     s_id.value = window.selectedSolutionId;
   }
 
-  try {
+  try{
     const s = collectSolutionFromForm();
-    const exists = (DATA.solutions || []).find(x => x.id === s.id);
+    const exists = (DATA.solutions||[]).find(x=>x.id===s.id);
     const verb = exists ? "Update" : "Add";
 
     // Confirm ONLY when updating existing
@@ -419,11 +438,8 @@ saveSolutionBtn.addEventListener("click", (e)=>{
 
     markDirty(`${verb} solution`);
     setStatus(`Solution ${verb.toLowerCase()} staged`);
-  } catch (err) {
-    alert(err.message);
-  }
+  } catch(err){ alert(err.message); }
 });
-
 
 deleteSolutionBtn.addEventListener("click", ()=>{
   const id = sTrim(s_id.value); if(!id) return alert("Load a solution first (click it in the list).");
@@ -481,6 +497,23 @@ function upsertSolution(s){
 }
 
 // ---------- Validation & Utils ----------
+function cleanseInvalidTagsAndLog(data){
+  const msgs = [];
+  (data.solutions || []).forEach(sol => {
+    const allowed = new Set(((data.features || {})[sol.category] || []).map(f => f.id));
+    const before = Array.isArray(sol.tags) ? [...sol.tags] : [];
+    sol.tags = before.filter(t => allowed.has(t));
+    const removed = before.filter(t => !sol.tags.includes(t));
+    if (removed.length){
+      msgs.push(`Auto-removed invalid tag(s) [${removed.join(", ")}] from "${sol.name}" (${sol.category})`);
+    }
+  });
+  if (msgs.length){
+    changeList.push(...msgs);
+    renderDirty();
+  }
+}
+
 function validateData(obj, strict=false){
   if(typeof obj!=="object"||!obj) throw new Error("Root must be an object.");
   if(!Array.isArray(obj.categories)) throw new Error("categories must be an array.");
@@ -512,23 +545,6 @@ function validateData(obj, strict=false){
     seenSol.add(s.id);
   });
 }
-function cleanseInvalidTagsAndLog(data){
-  const msgs = [];
-  (data.solutions || []).forEach(sol => {
-    const allowed = new Set(((data.features || {})[sol.category] || []).map(f => f.id));
-    const before = Array.isArray(sol.tags) ? [...sol.tags] : [];
-    sol.tags = before.filter(t => allowed.has(t));
-    const removed = before.filter(t => !sol.tags.includes(t));
-    if (removed.length){
-      msgs.push(`Auto-removed invalid tag(s) [${removed.join(", ")}] from "${sol.name}" (${sol.category})`);
-    }
-  });
-  if (msgs.length){
-    changeList.push(...msgs);
-    renderDirty();
-  }
-}
-
 function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
 function sTrim(v){ return String(v||"").trim(); }
 function downloadJSON(obj, filename){

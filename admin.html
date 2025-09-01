@@ -43,9 +43,11 @@
             <div id="lastLoaded" class="text-xs text-neutral-500"></div>
             <div id="dirtyState" class="text-xs mt-1"></div>
           </div>
-          <div class="sm:ml-auto flex gap-2">
+          <div class="sm:ml-auto flex flex-wrap gap-2">
             <button id="reloadBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Reload from /data/solutions.json">Reload</button>
             <button id="discardBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Discard all unsaved changes">Discard Changes</button>
+            <button id="previewBtn" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500" title="Use staged data in this browser only">Preview in this browser</button>
+            <button id="clearPreviewBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Turn off preview for this browser">Clear Preview</button>
             <button id="saveAllBtn" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-500" title="Export updated solutions.json">Save All</button>
           </div>
         </div>
@@ -99,7 +101,10 @@
           </div>
 
           <div id="solutionsList" class="space-y-2 max-h-64 overflow-auto mb-4"></div>
+
+          <!-- Mode banner (New vs Editing) -->
           <div id="solMode" class="mb-2 text-xs text-neutral-400"></div>
+
           <form id="solutionForm" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <!-- Hidden stable ID (auto-generated on first save) -->
             <input type="hidden" id="s_id" />
@@ -157,6 +162,7 @@
       </div>
     </section>
   </div>
+
   <script src="admin.js"></script>
 </body>
 </html>

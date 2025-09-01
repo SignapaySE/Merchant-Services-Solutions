@@ -1,16 +1,30 @@
-// app.js — loads data/solutions.json and renders your original UI/flow (vanilla JS)
 
-const DATA_URL = "data/solutions.json"; // relative path for GitHub Pages project sites
+// ======================================
+// Main App Script (app.js)
+// ======================================
 
-let DATA = null;
+// Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
+async function loadAppData() {
+  try {
+    const enabled = localStorage.getItem('solutions_preview_enabled') === '1';
+    const preview = localStorage.getItem('solutions_preview_data');
+    if (enabled && preview) {
+      console.log("⚡ Using preview data from localStorage");
+      return JSON.parse(preview);
+    }
+  } catch (_) {}
+  const res = await fetch('data/solutions.json', { cache: 'no-store' });
+  return await res.json();
+}
 
-// ===== State =====
+/* ===== State ===== */
 let step = 1;
 let bizType = null;
 let selected = [];
 let openSolution = null;
+let DATA = null;
 
-// ===== DOM refs =====
+/* ===== DOM refs ===== */
 const stepper = document.getElementById('stepper');
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
@@ -32,23 +46,7 @@ const allFeatures = document.getElementById('allFeatures');
 const terminalDetails = document.getElementById('terminalDetails');
 const shift4Details = document.getElementById('shift4Details');
 
-// ===== Init =====
-init();
-async function init() {
-  try {
-    const res = await fetch(DATA_URL, { cache: "no-store" });
-    DATA = await res.json();
-  } catch (err) {
-    console.error("Failed to load data/solutions.json", err);
-    alert("Could not load data/solutions.json. Check the file path and commit.");
-    return;
-  }
-  render();
-}
-
-// ===== Rendering (exactly your original styles) =====
-function render() { renderStepper(); renderStep1(); renderStep2(); renderStep3(); }
-
+/* ===== Rendering ===== */
 function renderStepper() {
   [...stepper.children].forEach((el, i) => {
     const idx = i + 1;
@@ -64,45 +62,44 @@ function renderStepper() {
   });
 }
 
+function makeTypeButton(label, icon) {
+  const btn = document.createElement('button');
+  btn.type = "button";
+  btn.className =
+    "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700";
+  btn.onclick = () => { bizType = label; step = 2; render(); };
+
+  const iconDiv = document.createElement('div');
+  iconDiv.className = "text-lg";
+  iconDiv.textContent = icon;
+
+  const left = document.createElement('div');
+  left.className = "flex-1 text-left";
+  left.innerHTML = `
+    <div class="font-semibold text-slate-100">${label}</div>
+    <div class="text-xs text-slate-400">Tap to select this business type</div>
+  `;
+
+  const bullet = document.createElement('div');
+  bullet.className = "h-5 w-5 rounded-full border border-slate-600";
+
+  btn.append(iconDiv, left, bullet);
+  return btn;
+}
+
 function renderStep1() {
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
-  const cats = DATA.categories || [];
-  const iconMap = { Restaurant: "🍽️", Retail: "🛍️" };
-  cats.forEach(label => {
-    const btn = document.createElement('button');
-    btn.type = "button";
-    btn.className =
-      "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700";
-    btn.onclick = () => { bizType = label; step = 2; render(); };
-
-    const iconDiv = document.createElement('div');
-    iconDiv.className = "text-lg";
-    iconDiv.textContent = iconMap[label] || "💼";
-
-    const left = document.createElement('div');
-    left.className = "flex-1 text-left";
-    left.innerHTML = `
-      <div class="font-semibold text-slate-100">${label}</div>
-      <div class="text-xs text-slate-400">Tap to select this business type</div>
-    `;
-
-    const bullet = document.createElement('div');
-    bullet.className = "h-5 w-5 rounded-full border border-slate-600";
-
-    btn.append(iconDiv, left, bullet);
-    step1.appendChild(btn);
-  });
+  const map = { Restaurant: "🍽️", Retail: "🛍️" };
+  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "💼")));
 }
 
 function renderStep2() {
   step2.classList.toggle('hidden', step !== 2);
   if (step !== 2) return;
-
   needsTitle.textContent = `What does this ${bizType} need?`;
   needsGrid.innerHTML = "";
-
-  const menu = (DATA.features && DATA.features[bizType]) ? DATA.features[bizType] : [];
+  const menu = (DATA.features[bizType] || []);
   menu.forEach(f => {
     const label = document.createElement('label');
     label.className = "flex cursor-pointer items-center gap-3 rounded-xl border border-slate-700 bg-slate-800 p-3 hover:bg-slate-700";
@@ -110,10 +107,10 @@ function renderStep2() {
     const input = document.createElement('input');
     input.type = "checkbox";
     input.className = "h-4 w-4";
-    input.checked = selected.includes(f.id);
+    input.checked = selected.includes(f.label);
     input.onchange = () => {
-      if (selected.includes(f.id)) selected = selected.filter(x => x !== f.id);
-      else selected.push(f.id);
+      if (selected.includes(f.label)) selected = selected.filter(x => x !== f.label);
+      else selected.push(f.label);
     };
 
     const span = document.createElement('span');
@@ -124,24 +121,29 @@ function renderStep2() {
     needsGrid.appendChild(label);
   });
 
-  document.getElementById('selectAll').onclick = () => { selected = menu.map(f => f.id); renderStep2(); };
+  document.getElementById('selectAll').onclick = () => { selected = menu.map(m=>m.label); renderStep2(); };
   document.getElementById('clearAll').onclick = () => { selected = []; renderStep2(); };
   document.getElementById('backTo1').onclick = () => { step = 1; render(); };
   document.getElementById('toStep3').onclick  = () => { step = 3; render(); };
 }
 
-function scoreSolution(sol) {
+function scoreSolution(item) {
   if (selected.length === 0) return 100;
-  const tags = new Set(sol.tags || []);
-  const overlap = selected.filter(t => tags.has(t)).length;
+  const overlap = item.tags
+    .map(tag => {
+      const feat = (DATA.features[item.category] || []).find(f => f.id === tag);
+      return feat ? feat.label : null;
+    })
+    .filter(Boolean)
+    .filter(label => selected.includes(label)).length;
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
 }
 
-function makeSolutionCard(sol, score) {
+function makeSolutionCard(item, score) {
   const btn = document.createElement('button');
   btn.type = "button";
   btn.className = "text-left w-full";
-  btn.onclick = () => openAnalysis(sol);
+  btn.onclick = () => openAnalysis(item);
 
   const card = document.createElement('div');
   card.className = "rounded-2xl border border-blue-500/40 bg-slate-800 p-4 shadow-sm transition hover:shadow-md";
@@ -151,17 +153,17 @@ function makeSolutionCard(sol, score) {
 
   const title = document.createElement('h3');
   title.className = "text-base font-semibold text-slate-100";
-  title.textContent = sol.name;
+  title.textContent = item.name;
 
   const badge = document.createElement('span');
   badge.className = "inline-flex items-center rounded-full border border-blue-400 bg-blue-900/40 px-2 py-0.5 text-xs font-medium text-blue-200";
-  badge.textContent = sol.category;
+  badge.textContent = item.category;
 
   top.append(title, badge);
 
   const desc = document.createElement('p');
   desc.className = "mb-3 text-sm text-slate-300";
-  desc.textContent = sol.summary || "";
+  desc.textContent = item.summary;
 
   const ms = document.createElement('div');
   const scoreColor = score > 0 ? "text-green-400" : "text-red-400";
@@ -176,68 +178,61 @@ function makeSolutionCard(sol, score) {
 function renderStep3() {
   step3.classList.toggle('hidden', step !== 3);
   if (step !== 3) return;
-
   solutionsGrid.innerHTML = "";
-  const pool = (DATA.solutions || []).filter(s => s.category === bizType);
-  const scored = pool.map(s => ({ s, score: scoreSolution(s) })).sort((a,b) => b.score - a.score);
-
-  if (!scored.length) {
+  const pool = DATA.solutions.filter(c => c.category === bizType);
+  const scored = pool.map(item => ({ item, score: scoreSolution(item) }))
+                     .sort((a,b) => b.score - a.score);
+  if (scored.length === 0) {
     const empty = document.createElement('div');
     empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
     empty.textContent = "No matches yet. Try adding or removing needs.";
     solutionsGrid.appendChild(empty);
   } else {
-    scored.forEach(({s, score}) => solutionsGrid.appendChild(makeSolutionCard(s, score)));
+    scored.forEach(({item, score}) => solutionsGrid.appendChild(makeSolutionCard(item, score)));
   }
-
   adjustNeedsBtn.onclick = () => { step = 2; render(); };
 }
 
-// ===== Modal control =====
-function openAnalysis(sol) {
-  openSolution = sol;
+/* ===== Modal control ===== */
+function openAnalysis(item) {
+  openSolution = item;
 
-  modalTitle.textContent = sol.name;
+  modalTitle.textContent = item.name;
   modalLinks.innerHTML = "";
-  if (sol.links?.product) {
+  if (item.links && item.links.product) {
     const a = document.createElement('a');
-    a.href = sol.links.product; a.target = "_blank"; a.rel = "noreferrer";
+    a.href = item.links.product; a.target = "_blank"; a.rel = "noreferrer";
     a.className = "rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700";
     a.textContent = "Official product page ↗";
     modalLinks.appendChild(a);
   }
-  if (sol.links?.paperwork) {
+  if (item.links && item.links.paperwork) {
     const a2 = document.createElement('a');
-    a2.href = sol.links.paperwork; a2.target = "_blank"; a2.rel = "noreferrer";
+    a2.href = item.links.paperwork; a2.target = "_blank"; a2.rel = "noreferrer";
     a2.className = "rounded-lg bg-blue-900/30 px-3 py-2 text-xs font-medium text-blue-200 ring-1 ring-blue-800 hover:bg-blue-900/50";
     a2.textContent = "Paperwork ↗";
     modalLinks.appendChild(a2);
   }
 
-  const tags = new Set(sol.tags || []);
-  const matches = selected.filter(f => tags.has(f)).map(id => labelFor(id));
-  const misses  = selected.filter(f => !tags.has(f)).map(id => labelFor(id));
+  const featLabels = (DATA.features[item.category] || []).reduce((acc,f)=>{acc[f.id]=f.label;return acc;}, {});
+  const matches = selected.filter(f => item.tags.map(t=>featLabels[t]).includes(f));
+  const misses  = selected.filter(f => !item.tags.map(t=>featLabels[t]).includes(f));
+  modalMatches.innerHTML = matches.length ? matches.map(f => `<li>${f}</li>`).join("") : "<li>No direct matches selected.</li>";
+  modalMisses.innerHTML = selected.length ? misses.map(f => `<li>${f}</li>`).join("") : "<li>No needs selected.</li>";
 
-  modalMatches.innerHTML = matches.length ? matches.map(f => `<li>${escapeHTML(f)}</li>`).join("") : "<li>No direct matches selected.</li>";
-  modalMisses.innerHTML  = selected.length ? misses.map(f => `<li>${escapeHTML(f)}</li>`).join("") : "<li>No needs selected.</li>";
-
-  // Show all features (labels) that solution supports
-  const allLabels = (sol.tags || []).map(id => labelFor(id));
-  allFeatures.innerHTML = allLabels.map(f =>
-    `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${escapeHTML(f)}</span>`
+  allFeatures.innerHTML = (item.tags || []).map(t =>
+    `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${featLabels[t]||t}</span>`
   ).join("");
 
-  // Special blocks
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
-  if (sol.special_block === "terminalDetails") terminalDetails.classList.remove('hidden');
-  if (sol.special_block === "shift4Details")   shift4Details.classList.remove('hidden');
+  if (item.special_block === "terminalDetails") terminalDetails.classList.remove('hidden');
+  if (item.special_block === "shift4Details") shift4Details.classList.remove('hidden');
 
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.documentElement.classList.add('scroll-lock');
   document.body.classList.add('scroll-lock');
 }
-
 function closeModal() {
   modal.classList.add('hidden'); modal.classList.remove('flex');
   openSolution = null;
@@ -245,18 +240,15 @@ function closeModal() {
   document.body.classList.remove('scroll-lock');
 }
 
-function labelFor(id){
-  // find the label by id across all categories
-  const feats = DATA.features || {};
-  for (const cat of Object.keys(feats)) {
-    const f = feats[cat].find(x => x.id === id);
-    if (f) return f.label;
-  }
-  return id;
-}
-function escapeHTML(s){ return String(s ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
-
-// ===== Events =====
-modalBackdrop.addEventListener('click', closeModal);
-modalClose.addEventListener('click', closeModal);
+/* ===== Wire events ===== */
+document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+document.getElementById('modalClose').addEventListener('click', closeModal);
 resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
+
+/* ===== Init ===== */
+async function bootstrap() {
+  DATA = await loadAppData();
+  render();
+}
+function render(){ renderStepper(); renderStep1(); renderStep2(); renderStep3(); }
+bootstrap();
