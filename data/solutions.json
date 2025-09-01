@@ -159,7 +159,7 @@
         "label": "PCI Compliance"
       }
     ],
-        "Service": [
+    "Service": [
       {
         "id": "online_booking",
         "label": "Online booking"
@@ -212,7 +212,7 @@
       },
       {
         "id": "inventory_sync",
-        "label": "Inventory sync (POS \u2194 online)"
+        "label": "Inventory sync (POS ↔ online)"
       },
       {
         "id": "discount_codes",
@@ -319,22 +319,22 @@
       "specialBlocks": [
         {
           "name": "Valor VL100 / VL100 Pro",
-          "description": "Countertop \u00b7 EMV, NFC, Wi-Fi/Ethernet",
+          "description": "Countertop · EMV, NFC, Wi-Fi/Ethernet",
           "link": "https://valorpaytech.com/what-we-do/hardware-products/countertop-pos/vl100-pro/"
         },
         {
           "name": "Dejavoo QD4",
-          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "description": "Android countertop · EMV, NFC, Ethernet/Wi-Fi",
           "link": "https://dejavoo.io/products/qd-terminals-family/qd4/"
         },
         {
           "name": "PAX A80",
-          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "description": "Android countertop · EMV, NFC, Ethernet/Wi-Fi",
           "link": "https://www.paxtechnology.com/a80"
         },
         {
           "name": "Dejavoo P3 (Wireless)",
-          "description": "Handheld LTE/Wi-Fi \u00b7 EMV, NFC, built-in printer",
+          "description": "Handheld LTE/Wi-Fi · EMV, NFC, built-in printer",
           "link": "https://dejavoo.io/products/p-terminals-family/p3/"
         }
       ]
@@ -407,27 +407,27 @@
       "specialBlocks": [
         {
           "name": "Valor VL100 / VL100 Pro",
-          "description": "Countertop \u00b7 EMV, NFC, Wi-Fi/Ethernet",
+          "description": "Countertop · EMV, NFC, Wi-Fi/Ethernet",
           "link": "https://valorpaytech.com/what-we-do/hardware-products/countertop-pos/vl100-pro/"
         },
         {
           "name": "Dejavoo QD4",
-          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "description": "Android countertop · EMV, NFC, Ethernet/Wi-Fi",
           "link": "https://dejavoo.io/products/qd-terminals-family/qd4/"
         },
         {
           "name": "PAX A80",
-          "description": "Android countertop \u00b7 EMV, NFC, Ethernet/Wi-Fi",
+          "description": "Android countertop · EMV, NFC, Ethernet/Wi-Fi",
           "link": "https://www.paxtechnology.com/a80"
         },
         {
           "name": "Dejavoo P3 (Wireless)",
-          "description": "Handheld LTE/Wi-Fi \u00b7 EMV, NFC, built-in printer",
+          "description": "Handheld LTE/Wi-Fi · EMV, NFC, built-in printer",
           "link": "https://dejavoo.io/products/p-terminals-family/p3/"
         }
       ]
     },
-     {
+    {
       "id": "fieldpro_pos",
       "name": "FieldPro POS",
       "category": "Service",
@@ -461,8 +461,7 @@
       "category": "Service",
       "tags": [
         "subscriptions",
-        "invoices",
-        "payments"
+        "invoices"
       ],
       "summary": "Simple recurring billing with invoice automation. Great for memberships, maintenance plans, and retainer services.",
       "links": {
@@ -489,7 +488,7 @@
         "discount_codes",
         "abandoned_cart"
       ],
-      "summary": "All\u2011in\u2011one ecommerce platform for small stores. Launch quickly with themes, secure checkout, and built\u2011in marketing tools.",
+      "summary": "All‑in‑one ecommerce platform for small stores. Launch quickly with themes, secure checkout, and built‑in marketing tools.",
       "links": {
         "site": "https://example.com/shopswift"
       },
@@ -501,7 +500,7 @@
         },
         {
           "name": "Marketing",
-          "description": "Email capture, discount codes, and abandoned\u2011cart recovery.",
+          "description": "Email capture, discount codes, and abandoned‑cart recovery.",
           "link": "https://example.com/shopswift/marketing"
         }
       ]
@@ -517,14 +516,14 @@
         "inventory_sync",
         "omnichannel"
       ],
-      "summary": "Lightweight cart for businesses that already have a POS. Sync inventory and sell online with pickup or in\u2011store fulfillment.",
+      "summary": "Lightweight cart for businesses that already have a POS. Sync inventory and sell online with pickup or in‑store fulfillment.",
       "links": {
         "site": "https://example.com/cartlite"
       },
       "specialBlocks": [
         {
           "name": "POS Sync",
-          "description": "Two\u2011way inventory sync and order injection back to store POS.",
+          "description": "Two‑way inventory sync and order injection back to store POS.",
           "link": "https://example.com/cartlite/pos-sync"
         }
       ]
@@ -549,6 +548,35 @@
           "name": "Countertop EMV/NFC terminals",
           "description": "Secure EMV chip, PIN, contactless, receipt printing",
           "link": "https://www.shift4network.com/credit-card-terminals/"
+        }
+      ]
+    },
+    {
+      "id": "test_business",
+      "name": "Test Business",
+      "category": "Restaurant",
+      "tags": [
+        "counter_service",
+        "reservations",
+        "inventory_mgmt",
+        "loyalty",
+        "labor_mgmt",
+        "payroll",
+        "emv"
+      ],
+      "summary": "testing summary",
+      "details": [
+        "testiing details"
+      ],
+      "links": {
+        "product": "https://google.com",
+        "paperwork": "https://google.com"
+      },
+      "specialBlocks": [
+        {
+          "name": "gdfgdfg",
+          "description": "dfgdfg",
+          "link": ""
         }
       ]
     }
