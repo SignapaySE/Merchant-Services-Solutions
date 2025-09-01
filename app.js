@@ -138,15 +138,18 @@ function renderStep2() {
 
 function scoreSolution(item) {
   if (selected.length === 0) return 100;
-  const overlap = item.tags
-    .map(tag => {
-      const feat = (DATA.features[item.category] || []).find(f => f.id === tag);
-      return feat ? feat.label : null;
-    })
+
+  const featLabelsMap = (DATA.features[item.category] || [])
+    .reduce((acc, f) => { acc[f.id] = f.label; return acc; }, {});
+
+  const overlap = (item.tags || [])
+    .map(tag => featLabelsMap[tag] || null)
     .filter(Boolean)
     .filter(label => selected.includes(label)).length;
+
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
 }
+
 
 function makeSolutionCard(item, score) {
   const btn = document.createElement('button');

@@ -104,6 +104,9 @@ saveAllBtn.addEventListener("click", () => {
   // 2) Safety sweep: drop tags that don't exist in the solution's category; log what we changed
   cleanseInvalidTagsAndLog(staged);
 
+  // 2b) Clean special blocks (strip empty ones; omit property when none)
+  cleanupAllSpecialBlocks(staged);
+
   // 3) Validate the cleaned copy so you don't get blocked by old leftovers
   try { validateData(staged, true); }
   catch (e) { alert("Fix validation issues before saving:\n" + e.message); return; }
@@ -118,6 +121,7 @@ saveAllBtn.addEventListener("click", () => {
 previewBtn.addEventListener('click', () => {
   const staged = deepClone(DATA);
   cleanseInvalidTagsAndLog(staged);
+  cleanupAllSpecialBlocks(staged);
   try { validateData(staged, true); }
   catch (e) { alert("Fix validation issues before previewing:\n" + e.message); return; }
   localStorage.setItem('solutions_preview_enabled', '1');
@@ -480,16 +484,27 @@ function collectSolutionFromForm(){
   const bad = tags.filter(t=>!allowed.has(t));
   if (bad.length) throw new Error(`These tags are not valid in ${category}: ${bad.join(", ")}`);
 
+  // Preserve & clean any existing special blocks for this solution (optional)
+  let existing = exists || (DATA.solutions||[]).find(x=>x.id===window.selectedSolutionId);
+  const cleanedSB = cleanSpecialBlocks(existing?.specialBlocks);
+  const baseObj = { id, name, category, tags, summary:s_summary.value, details, links };
+  if (cleanedSB.length) baseObj.specialBlocks = cleanedSB;
+
   // Write back the generated/locked id (still hidden)
   s_id.value = id;
 
-  return { id, name, category, tags, summary:s_summary.value, details, links, ...(special_block?{special_block}:{}) };
+  return baseObj;
 }
 
 function upsertSolution(s){
   if(!Array.isArray(DATA.solutions)) DATA.solutions=[];
   const i=DATA.solutions.findIndex(x=>x.id===s.id);
-  if(i>=0) DATA.solutions[i]=s; else DATA.solutions.push(s);
+  if(i>=0) {
+    // keep what collectSolutionFromForm prepared
+    DATA.solutions[i]=s;
+  } else {
+    DATA.solutions.push(s);
+  }
 }
 
 // ---------- Validation & Utils ----------
@@ -541,15 +556,22 @@ function validateData(obj, strict=false){
     seenSol.add(s.id);
   });
 }
+
 function deepClone(x){ return JSON.parse(JSON.stringify(x)); }
 function sTrim(v){ return String(v||"").trim(); }
+function trim(v){ return (v ?? "").toString().trim(); }
+
 function downloadJSON(obj, filename){
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), { href:url, download:filename });
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-function escapeHTML(s){ return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;"," >":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
+function escapeHTML(s){
+  return String(s??"").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
 function slugify(label){
   return String(label||"")
     .toLowerCase()
@@ -565,6 +587,26 @@ function uniqueSolutionId(base){
   while (list.some(s => s.id === id)) id = `${base}_${n++}`;
   return id;
 }
+
+/* ---------- Special Blocks helpers ---------- */
+function cleanSpecialBlocks(blocks){
+  const list = Array.isArray(blocks) ? blocks : [];
+  return list
+    .map(b => ({
+      name: trim(b?.name),
+      description: trim(b?.description),
+      link: trim(b?.link),
+    }))
+    .filter(b => b.name || b.description || b.link);
+}
+function cleanupAllSpecialBlocks(dataObj){
+  (dataObj.solutions || []).forEach(sol => {
+    const cleaned = cleanSpecialBlocks(sol.specialBlocks);
+    if (cleaned.length) sol.specialBlocks = cleaned;
+    else delete sol.specialBlocks;
+  });
+}
+
 /* ===== Special Blocks (Advanced) ===== */
 (function(){
   const advBtn = document.getElementById("openSpecialBlocks");
@@ -590,7 +632,7 @@ function uniqueSolutionId(base){
   }
 
   function ensureArray(sol){
-    if (!sol.specialBlocks) sol.specialBlocks = [];
+    if (!sol) return;
     if (!Array.isArray(sol.specialBlocks)) sol.specialBlocks = [];
   }
 
@@ -665,6 +707,7 @@ function uniqueSolutionId(base){
   function add(){
     const sol = getCurrentSolution(); if(!sol) return;
     ensureArray(sol);
+    // create a placeholder row; if user saves empty we'll remove it
     sol.specialBlocks.push({ name: "", description: "", link: "" });
     currentIndex = sol.specialBlocks.length - 1;
     dirty = true; changeList.push(`Added special block to ${sol.name}`);
@@ -683,19 +726,22 @@ function uniqueSolutionId(base){
     renderList(); renderDirty(); setStatus("Reordered special blocks");
   }
 
-  function validate(){
-    const name = nameEl.value.trim();
-    const desc = descEl.value.trim();
-    const link = linkEl.value.trim();
-    if (!name) throw new Error("Block Name is required.");
-    if (!desc) throw new Error("Description is required.");
-    if (link && !/^https?:\/\/.*/i.test(link)) throw new Error("Link must start with http:// or https://");
+  // relaxed validation: only check link format if provided, and duplicate NAMEs if name is present
+  function validateRelaxed(){
+    const name = trim(nameEl.value);
+    const desc = trim(descEl.value);
+    const link = trim(linkEl.value);
 
-    // duplicates
-    const sol = getCurrentSolution(); if(!sol) return;
-    const names = sol.specialBlocks.map((b,i)=> i===currentIndex ? name : (b?.name||""));
-    const dups = names.filter((n,i)=>n && names.indexOf(n)!==i);
-    if (dups.length) throw new Error(`Duplicate block name "${dups[0]}" in this solution.`);
+    if (link && !/^https?:\/\/.*/i.test(link)) {
+      throw new Error("Link must start with http:// or https://");
+    }
+
+    if (name) {
+      const sol = getCurrentSolution(); if(!sol) return { name, description: desc, link };
+      const names = sol.specialBlocks.map((b,i)=> i===currentIndex ? name : (b?.name||""));
+      const dups = names.filter((n,i)=>n && names.indexOf(n)!==i);
+      if (dups.length) throw new Error(`Duplicate block name "${dups[0]}" in this solution.`);
+    }
     return { name, description: desc, link };
   }
 
@@ -703,10 +749,25 @@ function uniqueSolutionId(base){
     const sol = getCurrentSolution(); if(!sol) return;
     ensureArray(sol);
     if (currentIndex < 0) { alert("Select a block (or click + Add)."); return; }
-    let val;
-    try { val = validate(); }
+
+    let rec;
+    try { rec = validateRelaxed(); }
     catch(e){ alert(e.message); return; }
-    sol.specialBlocks[currentIndex] = val;
+
+    // If all fields are empty => remove placeholder (or effectively noop)
+    if (!rec.name && !rec.description && !rec.link) {
+      // remove the empty row we were editing
+      sol.specialBlocks.splice(currentIndex, 1);
+      currentIndex = -1;
+      clearForm();
+      renderList();
+      renderDirty();
+      setStatus("Empty special block discarded");
+      return;
+    }
+
+    // Save/update
+    sol.specialBlocks[currentIndex] = rec;
     dirty = true; changeList.push(`Edited a special block for ${sol.name}`);
     renderList(); renderDirty(); setStatus("Saved special block");
   }
