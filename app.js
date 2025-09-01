@@ -1,7 +1,47 @@
-
 // ======================================
 // Main App Script (app.js)
 // ======================================
+
+// Normalize a data object for runtime display:
+// - For each solution, keep tags that are valid IDs for the solution's category
+// - Try to rescue legacy tags by label->id mapping (within the same category)
+// - Drop anything truly invalid
+function normalizeDataForRuntime(data) {
+  const clone = JSON.parse(JSON.stringify(data || {}));
+  const byCat = {};
+
+  (clone.categories || []).forEach(cat => {
+    const feats = (clone.features && clone.features[cat]) || [];
+    const id2label = {};
+    const label2id = {};
+    feats.forEach(f => {
+      id2label[f.id] = f.label;
+      label2id[f.label.toLowerCase()] = f.id;
+    });
+    byCat[cat] = { id2label, label2id };
+  });
+
+  (clone.solutions || []).forEach(sol => {
+    const { id2label, label2id } = byCat[sol.category] || { id2label: {}, label2id: {} };
+    const allowedIds = new Set(Object.keys(id2label));
+    const before = Array.isArray(sol.tags) ? sol.tags : [];
+    const after = [];
+
+    for (const t of before) {
+      if (allowedIds.has(t)) {
+        after.push(t);
+        continue;
+      }
+      const maybeLabel = String(t).trim().toLowerCase();
+      const rescueId = label2id[maybeLabel];
+      if (rescueId && allowedIds.has(rescueId)) after.push(rescueId);
+      // else silently drop
+    }
+    sol.tags = after;
+  });
+
+  return clone;
+}
 
 // Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
 async function loadAppData() {
@@ -9,12 +49,13 @@ async function loadAppData() {
     const enabled = localStorage.getItem('solutions_preview_enabled') === '1';
     const preview = localStorage.getItem('solutions_preview_data');
     if (enabled && preview) {
-      console.log("⚡ Using preview data from localStorage");
-      return JSON.parse(preview);
+      return normalizeDataForRuntime(JSON.parse(preview));
     }
   } catch (_) {}
+
   const res = await fetch('data/solutions.json', { cache: 'no-store' });
-  return await res.json();
+  const live = await res.json();
+  return normalizeDataForRuntime(live);
 }
 
 /* ===== State ===== */
@@ -129,11 +170,9 @@ function renderStep2() {
 
 function scoreSolution(item) {
   if (selected.length === 0) return 100;
+  const featLabels = (DATA.features[item.category] || []).reduce((acc,f)=>{acc[f.id]=f.label;return acc;}, {});
   const overlap = item.tags
-    .map(tag => {
-      const feat = (DATA.features[item.category] || []).find(f => f.id === tag);
-      return feat ? feat.label : null;
-    })
+    .map(t => featLabels[t])
     .filter(Boolean)
     .filter(label => selected.includes(label)).length;
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
@@ -173,6 +212,54 @@ function makeSolutionCard(item, score) {
   card.append(top, desc, ms);
   btn.appendChild(card);
   return btn;
+}
+
+function renderExtrasSection(sec) {
+  // style: "cards-2col" (default)
+  const wrap = document.createElement('div');
+  wrap.className = "hidden mt-4 md:block"; // desktop shows inside modal; mobile already scrolls
+  wrap.classList.remove('hidden');
+
+  const box = document.createElement('div');
+  box.className = "rounded-2xl border border-slate-700 bg-slate-800 p-4";
+  const title = document.createElement('h4');
+  title.className = "mb-2 text-sm font-semibold text-slate-200";
+  title.textContent = sec.title || "Additional details";
+
+  const desc = document.createElement('p');
+  if (sec.description) {
+    desc.className = "mb-3 text-sm text-slate-400";
+    desc.textContent = sec.description;
+  }
+
+  const grid = document.createElement('ul');
+  grid.className = "grid grid-cols-1 gap-2 md:grid-cols-2";
+
+  (sec.items || []).forEach(it => {
+    const li = document.createElement('li');
+    li.className = "rounded-lg border border-slate-700 p-3 text-sm";
+    const t = document.createElement('div');
+    t.className = "font-medium";
+    t.textContent = it.title || "(Untitled)";
+    const s = document.createElement('div');
+    s.className = "text-xs text-slate-400";
+    s.textContent = it.subtitle || "";
+    li.append(t, s);
+    if (it.url) {
+      const a = document.createElement('a');
+      a.target = "_blank"; a.rel = "noreferrer"; a.href = it.url;
+      a.className = "mt-2 inline-block text-xs font-medium text-blue-300 underline";
+      a.textContent = "Official page ↗";
+      li.appendChild(a);
+    }
+    grid.appendChild(li);
+  });
+
+  box.append(title);
+  if (sec.description) box.appendChild(desc);
+  box.appendChild(grid);
+  wrap.appendChild(box);
+  return wrap;
 }
 
 function renderStep3() {
@@ -224,6 +311,20 @@ function openAnalysis(item) {
     `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${featLabels[t]||t}</span>`
   ).join("");
 
+  // Custom extras (data-driven)
+  // Insert right before legacy blocks
+  const afterMissesAnchor = shift4Details.parentElement; // modal content wrapper
+  // First remove any previous dynamic extras
+  const oldExtras = document.querySelectorAll('[data-extra-section="1"]');
+  oldExtras.forEach(n => n.remove());
+  (item.extras || []).forEach(sec => {
+    const el = renderExtrasSection(sec);
+    el.setAttribute('data-extra-section', '1');
+    // place before legacy blocks
+    shift4Details.parentElement.insertBefore(el, terminalDetails);
+  });
+
+  // Legacy blocks (optional)
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
   if (item.special_block === "terminalDetails") terminalDetails.classList.remove('hidden');
