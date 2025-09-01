@@ -29,10 +29,12 @@
     #stepper > :last-child  { border-top-right-radius: .75rem; border-bottom-right-radius: .75rem; }
 
     /* Chevron chips */
-    .step-chev {
-      padding-right: 2.3rem; /* space for chevron tip */
-      background: transparent; /* default */
-    }
+   .step-chev {
+  position: relative;
+  padding-right: 2.25rem; /* space for chevron tip */
+  flex: 1 1 0;            /* <-- new: each tab gets equal width */
+  text-align: center;     /* <-- new: center the label */
+}
     .step-chev::after {
       content: "";
       position: absolute;
@@ -83,7 +85,7 @@
 
     <!-- Controls row: chevron stepper (left) + Reset (right) -->
     <div class="mb-4 flex items-center justify-between gap-3">
-      <nav id="stepper" class="text-[11px] sm:text-xs">
+     <nav id="stepper" class="mb-6 flex gap-0 flex-1 text-[11px] sm:text-xs">
         <div class="step-chev active  border px-3 py-2">1. Business type</div>
         <div class="step-chev inactive border px-3 py-2">2. Needs</div>
         <div class="step-chev last inactive border px-3 py-2">3. Solutions</div>
