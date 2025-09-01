@@ -34,7 +34,8 @@ const needsGrid = document.getElementById('needsGrid');
 const solutionsGrid = document.getElementById('solutionsGrid');
 const resetBtn = document.getElementById('resetBtn');
 const adjustNeedsBtn = document.getElementById('adjustNeeds');
-
+const promptEl = document.getElementById('categoryPrompt');
+const promptTextEl = document.getElementById('promptText');
 const modal = document.getElementById('modal');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose = document.getElementById('modalClose');
@@ -56,6 +57,23 @@ function escapeHTML(s){
 
 
 /* ===== Rendering ===== */
+
+function renderPrompt() {
+  if (!promptEl || !promptTextEl) return;
+
+  let msg = '';
+  if (step === 1) {
+    msg = 'What type of business are you working with today?';
+  } else if (step === 2) {
+    msg = `Select the needs/features for this ${bizType || 'business'}.`;
+  } else if (step === 3) {
+    msg = 'Here are your matches (highest score first). Tap a card to see details.';
+  }
+
+  promptTextEl.textContent = msg;
+}
+
+
 function renderStepper() {
   [...stepper.children].forEach((el, i) => {
     const idx = i + 1;
@@ -278,5 +296,5 @@ async function bootstrap() {
   DATA = await loadAppData();
   render();
 }
-function render(){ renderStepper(); renderStep1(); renderStep2(); renderStep3(); }
+function render(){ renderStepper(); renderStep1(); renderStep2(); renderStep3(); renderPrompt(); }
 bootstrap();
