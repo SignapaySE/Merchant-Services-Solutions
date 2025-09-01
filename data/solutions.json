@@ -95,7 +95,7 @@
       "id":"signapay-retail-terminals",
       "name":"SignaPay SE Desktop Terminals",
       "category":"Retail",
-      "tags":["emv","contactless","receipt_print","terminal_simple","pin_debit","dual_pricing"],
+      "tags":["pin_debit", "dual_pricing", "pci_r"],
       "summary":"Secure countertop and wireless payment terminals for retail stores supporting EMV, NFC, and simple card acceptance.",
       "links":{"product":"https://www.signapayse.com","paperwork":"https://www.zoho.com"},
       "special_block":"terminalDetails"
@@ -104,7 +104,7 @@
       "id":"shift4-retail-terminals",
       "name":"Shift4 Desktop Terminals",
       "category":"Retail",
-      "tags":["emv","contactless","pci_r","receipt_print","terminal_simple","pin_debit"],
+      "tags":["pin_debit", "dual_pricing", "pci_r"],
       "summary":"Shift4 retail terminals provide reliable card acceptance with EMV, contactless payments, and PCI compliant processing.",
       "links":{"product":"https://www.shift4network.com/credit-card-terminals/","paperwork":"https://www.zoho.com"},
       "special_block":"shift4Details"
