@@ -693,7 +693,8 @@ function uniqueSolutionId(base){
     const link = linkEl.value.trim();
     if (!name) throw new Error("Block Name is required.");
     if (!desc) throw new Error("Description is required.");
-    if (link && !/^https?:\\/\\//i.test(link)) throw new Error("Link must start with http:// or https://");
+    if (link && !/^https?:\/\/.*/i.test(link)) throw new Error("Link must start with http:// or https://");
+
     // duplicates
     const sol = getCurrentSolution(); if(!sol) return;
     const names = sol.specialBlocks.map((b,i)=> i===currentIndex ? name : (b?.name||""));
