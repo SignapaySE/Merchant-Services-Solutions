@@ -45,7 +45,6 @@ const solutionsList = document.getElementById("solutionsList");
 const s_id = document.getElementById("s_id"); // hidden (auto-generated)
 const s_name = document.getElementById("s_name");
 const s_category = document.getElementById("s_category");
-const s_special = document.getElementById("s_special");
 const s_summary = document.getElementById("s_summary");
 const s_details = document.getElementById("s_details");
 const s_link_product = document.getElementById("s_link_product");
@@ -363,7 +362,6 @@ function loadSolutionIntoForm(id){
   s_id.value         = s.id || "";         // hidden, stable id
   s_name.value       = s.name || "";
   s_category.value   = s.category || DATA.categories?.[0] || "";
-  s_special.value    = s.special_block || "";
   s_summary.value    = s.summary || "";
   s_details.value    = (Array.isArray(s.details) ? s.details : []).join("\n");
   s_link_product.value = (s.links && s.links.product) || "";
@@ -399,7 +397,6 @@ newSolutionBtn.addEventListener("click", ()=>{
   s_id.value = ""; // no id yet; will generate on save
   s_name.value = "";
   s_category.value = window.activeCategory || (DATA.categories?.[0] || "");
-  s_special.value = "";
   s_summary.value = "";
   s_details.value = "";
   s_link_product.value = "";
@@ -476,7 +473,6 @@ function collectSolutionFromForm(){
   const tags = [...tagPicker.querySelectorAll("input[type=checkbox]:checked")].map(cb=>cb.value);
   const details = s_details.value.split("\n").map(x=>x.trim()).filter(Boolean);
   const links = { product:sTrim(s_link_product.value), paperwork:sTrim(s_link_paper.value) };
-  const special_block = sTrim(s_special.value) || undefined;
 
   // Category-safe tags
   const feats = (DATA.features && DATA.features[category]) || [];
