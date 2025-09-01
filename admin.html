@@ -3,141 +3,164 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Admin · Solutions & Features</title>
+  <title>Admin • Merchant Solutions Data</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .hidden-important { display: none !important; }
-    .input { @apply w-full rounded-lg bg-neutral-900 border border-neutral-700 px-3 py-2 text-sm; }
-    .btn { @apply px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800; }
-    .btn-primary { @apply px-3 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700; }
-    .btn-danger { @apply px-3 py-2 rounded bg-rose-600 text-white hover:bg-rose-700; }
-    .chip { @apply px-2 py-1 rounded-full bg-neutral-800 border border-neutral-700 text-xs; }
+    .hidden-important{display:none!important}
+    details > summary { cursor: pointer; }
   </style>
 </head>
-<body class="min-h-screen bg-neutral-900 text-neutral-100">
-  <div class="mx-auto max-w-6xl p-4">
-    <h1 class="text-2xl font-bold mb-4">Admin: Solutions & Features</h1>
-
-    <!-- Gate -->
-    <div id="gate" class="rounded-lg border border-neutral-800 p-4">
-      <p class="mb-3">Enter password to manage data.</p>
-      <div class="flex gap-2">
-        <input id="pw" type="password" class="input" placeholder="Password" />
-        <button id="enterBtn" class="btn-primary">Enter</button>
+<body class="min-h-screen bg-neutral-950 text-neutral-100">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <header class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">Admin: Solutions & Features</h1>
+        <p class="text-neutral-300 text-sm">
+          Loads from live <code>/data/solutions.json</code>. Changes are staged until you click <b>Save All</b>.
+        </p>
       </div>
-    </div>
+      <a href="./" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800">Back to App</a>
+    </header>
 
-    <div id="adminUI" class="hidden-important">
+    <!-- Password gate -->
+    <section id="gate" class="mb-6">
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+        <label class="block text-sm mb-2 font-medium" for="pw">Enter Admin Password</label>
+        <div class="flex gap-2">
+          <input id="pw" type="password" class="w-64 px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
+          <button id="enterBtn" class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500">Enter</button>
+        </div>
+        <p class="text-xs text-neutral-400 mt-2">Password is set in <code>admin.js</code>.</p>
+      </div>
+    </section>
+
+    <section id="adminUI" class="hidden-important">
       <!-- Top bar -->
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <div class="text-sm text-neutral-400" id="status">Ready</div>
-        <div class="text-xs text-neutral-500" id="lastLoaded"></div>
-        <div class="text-xs" id="dirtyState"></div>
-        <div class="flex-1"></div>
-        <button id="reloadBtn" class="btn">Reload</button>
-        <button id="discardBtn" class="btn">Discard Changes</button>
-        <button id="diagnosticsBtn" class="btn" title="Check for invalid tags">Diagnostics</button>
-        <button id="previewBtn" class="btn">Preview in this browser</button>
-        <button id="clearPreviewBtn" class="btn">Clear Preview</button>
-        <button id="saveAllBtn" class="btn-primary">Save All</button>
+      <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div class="text-sm">
+            <div id="status" class="text-neutral-300">Loading…</div>
+            <div id="lastLoaded" class="text-xs text-neutral-500"></div>
+            <div id="dirtyState" class="text-xs mt-1"></div>
+          </div>
+          <div class="sm:ml-auto flex flex-wrap gap-2">
+            <button id="reloadBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Reload from /data/solutions.json">Reload</button>
+            <button id="discardBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Discard all unsaved changes">Discard Changes</button>
+            <button id="previewBtn" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500" title="Use staged data in this browser only">Preview in this browser</button>
+            <button id="clearPreviewBtn" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800" title="Turn off preview for this browser">Clear Preview</button>
+            <button id="saveAllBtn" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-500" title="Export updated solutions.json">Save All</button>
+          </div>
+        </div>
+        <div id="changeLogWrap" class="mt-3 hidden">
+          <div class="text-xs text-neutral-400 mb-1">Pending changes:</div>
+          <ul id="changeLog" class="text-xs text-neutral-300 list-disc list-inside space-y-1"></ul>
+        </div>
       </div>
 
-      <!-- Change log -->
-      <div id="changeLogWrap" class="hidden rounded-lg border border-neutral-800 p-4 mb-6">
-        <div class="text-sm font-semibold mb-2">Pending changes:</div>
-        <ul id="changeLog" class="text-sm list-disc pl-5"></ul>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid lg:grid-cols-2 gap-6">
         <!-- Features -->
-        <section class="rounded-lg border border-neutral-800 p-4">
+        <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
           <h2 class="text-lg font-semibold mb-3">Features</h2>
-          <div id="categoryList" class="flex flex-wrap gap-2 mb-3"></div>
 
-          <div class="mb-2 text-xs text-neutral-400">Click a feature pill to edit its label.</div>
-          <div id="featureList" class="flex flex-wrap gap-2 mb-4"></div>
+          <div class="mb-3">
+            <label class="block text-sm mb-1 font-medium">Category</label>
+            <div id="categoryList" class="flex flex-wrap gap-2"></div>
+          </div>
 
-          <form class="grid grid-cols-1 gap-2">
-            <input id="selectedFeatId" type="hidden" />
-            <label class="text-sm">Feature label</label>
-            <input id="featLabel" class="input" placeholder="e.g., Contactless Payments" />
-            <div class="text-xs text-neutral-400" id="idPreview">New ID will be generated automatically</div>
-            <div class="text-xs text-neutral-400" id="usedBy"></div>
-            <div class="flex gap-2 mt-2">
-              <button id="addFeatBtn" class="btn">Add feature</button>
-              <button type="button" id="renameFeatBtn" class="btn">Update label</button>
-              <button type="button" id="delFeatBtn" class="btn-danger">Delete feature</button>
+          <div class="mb-3">
+            <label class="block text-sm mb-1 font-medium">Features in selected category</label>
+            <div id="featureList" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <form id="featureForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end mt-3">
+            <input type="hidden" id="selectedFeatId" />
+            <div class="sm:col-span-2">
+              <label class="block text-xs mb-1">Feature Label</label>
+              <input id="featLabel" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" placeholder="e.g., Table Service" />
+              <div id="idPreview" class="text-[11px] text-neutral-400 mt-1">New ID will be generated automatically</div>
+              <div id="usedBy" class="text-[11px] text-neutral-500 mt-1"></div>
             </div>
+            <div class="sm:col-span-3 flex flex-wrap gap-2">
+              <button id="addFeatBtn" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-500">Add New Feature</button>
+              <button id="renameFeatBtn" type="button" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800">Rename Selected</button>
+              <button id="delFeatBtn" type="button" class="px-3 py-2 rounded border border-red-700 text-red-300 hover:bg-red-900/30">Delete Selected</button>
+            </div>
+            <p class="sm:col-span-3 text-[11px] text-neutral-500">
+              IDs are hidden and stable. Renaming affects the label only.
+            </p>
           </form>
-        </section>
+        </div>
 
         <!-- Solutions -->
-        <section class="rounded-lg border border-neutral-800 p-4">
+        <div class="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
           <h2 class="text-lg font-semibold mb-3">Solutions</h2>
 
-          <div class="mb-3 flex items-center gap-2">
-            <label class="text-sm">Filter by category</label>
-            <select id="solnCategoryFilter" class="input w-auto"></select>
-            <span id="solMode" class="mb-2 text-xs text-neutral-400"></span>
+          <div class="mb-3">
+            <label class="block text-sm mb-1 font-medium">Filter by Category</label>
+            <select id="solnCategoryFilter" class="px-3 py-2 rounded bg-neutral-950 border border-neutral-700"></select>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <div id="solutionsList" class="space-y-2"></div>
+          <div id="solutionsList" class="space-y-2 max-h-64 overflow-auto mb-4"></div>
+
+          <!-- Mode banner (New vs Editing) -->
+          <div id="solMode" class="mb-2 text-xs text-neutral-400"></div>
+
+          <form id="solutionForm" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- Hidden stable ID (auto-generated on first save) -->
+            <input type="hidden" id="s_id" />
+
+            <div class="sm:col-span-2"><label class="block text-xs mb-1">Name</label>
+              <input id="s_name" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
             </div>
 
-            <form class="space-y-2">
-              <input id="s_id" type="hidden" />
-              <label class="text-sm">Name</label>
-              <input id="s_name" class="input" placeholder="Solution name" />
+            <div><label class="block text-xs mb-1">Category</label>
+              <select id="s_category" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700"></select>
+            </div>
 
-              <label class="text-sm">Category</label>
-              <select id="s_category" class="input"></select>
+            <details class="sm:col-span-1">
+              <summary class="text-xs text-neutral-400 select-none">Advanced</summary>
+              <label class="block text-xs mt-2 mb-1">Special Block</label>
+              <select id="s_special" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700">
+                <option value="">None</option>
+                <option value="terminalDetails">terminalDetails</option>
+                <option value="shift4Details">shift4Details</option>
+              </select>
+            </details>
 
-              <label class="text-sm">Summary</label>
-              <textarea id="s_summary" class="input" rows="2" placeholder="Short description"></textarea>
+            <div class="sm:col-span-2"><label class="block text-xs mb-1">Summary</label>
+              <input id="s_summary" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
+            </div>
 
-              <label class="text-sm">Details (one per line)</label>
-              <textarea id="s_details" class="input" rows="4" placeholder="Bullet points, one per line"></textarea>
+            <div class="sm:col-span-2"><label class="block text-xs mb-1">Details (one per line)</label>
+              <textarea id="s_details" rows="3" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700"></textarea>
+            </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div>
-                  <label class="text-sm">Product URL</label>
-                  <input id="s_link_product" class="input" placeholder="https://..." />
-                </div>
-                <div>
-                  <label class="text-sm">Paperwork URL</label>
-                  <input id="s_link_paper" class="input" placeholder="https://..." />
-                </div>
-              </div>
+            <div><label class="block text-xs mb-1">Product URL</label>
+              <input id="s_link_product" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
+            </div>
 
-              <div>
-                <label class="text-sm">Tags (features in this category)</label>
-                <div id="tagPicker" class="grid grid-cols-2 gap-2 mt-1"></div>
-              </div>
+            <div><label class="block text-xs mb-1">Paperwork URL</label>
+              <input id="s_link_paper" class="w-full px-3 py-2 rounded bg-neutral-950 border border-neutral-700" />
+            </div>
 
-              <!-- Extras editor -->
-              <div class="mt-4 rounded-lg border border-neutral-800 p-3">
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="text-sm font-semibold">Extras (optional blocks)</h3>
-                  <div class="flex items-center gap-2">
-                    <button id="convertLegacyBtn" type="button" class="btn" title="Convert special block to editable extras">Convert legacy terminal block</button>
-                    <button id="addExtraBtn" type="button" class="btn">Add section</button>
-                  </div>
-                </div>
-                <div id="extrasEditor" class="space-y-3"></div>
-              </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs mb-1">Tags (from current category features)</label>
+              <div id="tagPicker" class="flex flex-wrap gap-2"></div>
+            </div>
 
-              <div class="flex gap-2 pt-2">
-                <button id="newSolutionBtn" type="button" class="btn">New Solution</button>
-                <button id="saveSolutionBtn" class="btn-primary" type="submit">Add / Update Solution</button>
-                <button id="deleteSolutionBtn" type="button" class="btn-danger">Delete</button>
-              </div>
-            </form>
-          </div>
-        </section>
+            <div class="sm:col-span-2 flex flex-wrap gap-2 mt-2">
+              <button id="newSolutionBtn" type="button" class="px-3 py-2 rounded border border-neutral-700 hover:bg-neutral-800">New Solution</button>
+              <button id="saveSolutionBtn" class="px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-500">Add/Update Solution</button>
+              <button id="deleteSolutionBtn" type="button" class="px-3 py-2 rounded border border-red-700 text-red-300 hover:bg-red-900/30">Delete Solution</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+
+      <div class="mt-6 text-xs text-neutral-400">
+        When finished: <b>Save All</b> → download <code>solutions.json</code> → overwrite <code>data/solutions.json</code> in the repo → commit & push → refresh main app.
+      </div>
+    </section>
   </div>
 
   <script src="admin.js"></script>
