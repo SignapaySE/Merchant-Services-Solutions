@@ -34,7 +34,7 @@
       },
       {
         "id": "kitchen_printer",
-        "label": "Kitchen Printer Integration"
+        "label": "Kitchen Printer"
       },
       {
         "id": "inventory_mgmt",
@@ -57,10 +57,6 @@
         "label": "Employee Management"
       },
       {
-        "id": "labor_mgmt",
-        "label": "Labor Management"
-      },
-      {
         "id": "analytics",
         "label": "Reporting & Analytics"
       },
@@ -73,16 +69,8 @@
         "label": "Pay-at-Table"
       },
       {
-        "id": "site_builder",
-        "label": "Website Builder"
-      },
-      {
-        "id": "app_market",
-        "label": "App Marketplace"
-      },
-      {
         "id": "payroll",
-        "label": "Payroll Integration"
+        "label": "Payroll"
       },
       {
         "id": "emv",
@@ -107,12 +95,16 @@
       {
         "id": "terminal_simple",
         "label": "Terminal Simplicity"
+      },
+      {
+        "id": "kitchen_display_screen",
+        "label": "Kitchen Display Screen"
       }
     ],
     "Retail": [
       {
         "id": "inventory",
-        "label": "Inventory"
+        "label": "Inventory Management"
       },
       {
         "id": "barcode",
@@ -127,16 +119,12 @@
         "label": "Discounts"
       },
       {
-        "id": "po",
-        "label": "Purchase Orders"
-      },
-      {
         "id": "gift_cards_r",
         "label": "Gift Cards"
       },
       {
         "id": "loyalty_r",
-        "label": "Loyalty"
+        "label": "Loyalty Programs"
       },
       {
         "id": "cash_drawer",
@@ -157,6 +145,22 @@
       {
         "id": "pci_r",
         "label": "PCI Compliance"
+      },
+      {
+        "id": "printing",
+        "label": "Receipt Printing"
+      },
+      {
+        "id": "mobile_payments",
+        "label": "Mobile Payments"
+      },
+      {
+        "id": "software_integrations",
+        "label": "Software Integrations"
+      },
+      {
+        "id": "gas_station_ruby_or_gilbarro",
+        "label": "Gas Station, Ruby or Gilbarro"
       }
     ],
     "Service": [
@@ -235,7 +239,6 @@
       "category": "Restaurant",
       "tags": [
         "tips",
-        "table_service",
         "counter_service",
         "reservations",
         "online_ordering",
@@ -247,18 +250,16 @@
         "analytics",
         "mobile_pay",
         "payroll",
-        "app_market",
-        "pci"
+        "emv",
+        "contactless",
+        "wifi",
+        "receipt_print"
       ],
       "summary": "Customizable all-in-one POS system with hardware options, app marketplace, and robust tools for restaurants.",
-      "details": [
-        "Tableside or counter workflows",
-        "App marketplace",
-        "Hardware options"
-      ],
+      "details": [],
       "links": {
         "product": "https://www.clover.com",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/24d8dbb2e4041c917435992c878d18405b394"
       }
     },
     {
@@ -268,6 +269,7 @@
       "tags": [
         "tips",
         "table_service",
+        "counter_service",
         "reservations",
         "online_ordering",
         "qr_code",
@@ -276,11 +278,16 @@
         "loyalty",
         "gift_cards",
         "cust_display",
-        "labor_mgmt",
+        "employee_mgmt",
         "analytics",
+        "mobile_pay",
         "pay_at_table",
-        "site_builder",
-        "pci"
+        "payroll",
+        "contactless",
+        "wifi",
+        "receipt_print",
+        "pci",
+        "kitchen_display_screen"
       ],
       "summary": "Modern restaurant POS with built-in online ordering, reservations, QR code payments, and pay-at-the-table.",
       "details": [
@@ -298,24 +305,23 @@
       "name": "SignaPay SE Desktop Terminals",
       "category": "Restaurant",
       "tags": [
-        "counter_service",
+        "tips",
+        "gift_cards",
         "mobile_pay",
         "emv",
         "contactless",
         "wifi",
-        "terminal_simple",
-        "receipt_print"
+        "receipt_print",
+        "terminal_simple"
       ],
       "summary": "Countertop and wireless credit card terminals (Valor 100, Dejavoo QD4, PAX A80, Dejavoo P3) for secure restaurant payments.",
       "details": [
-        "Secure EMV/NFC",
         "Simple operation"
       ],
       "links": {
         "product": "https://www.signapayse.com",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/8zaf966f327c540a048f5810af952ac50237a"
       },
-      "special_block": "terminalDetails",
       "specialBlocks": [
         {
           "name": "Valor VL100 / VL100 Pro",
@@ -344,19 +350,21 @@
       "name": "Shift4 Desktop Terminals",
       "category": "Restaurant",
       "tags": [
-        "counter_service",
+        "tips",
+        "gift_cards",
+        "mobile_pay",
         "emv",
         "contactless",
-        "pci",
+        "wifi",
         "receipt_print",
         "terminal_simple"
       ],
       "summary": "Countertop payment terminals from Shift4 offering secure EMV, NFC contactless, and reliable processing for restaurants.",
+      "details": [],
       "links": {
         "product": "https://www.shift4network.com/credit-card-terminals/",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/q20adc28c10cbd3464d5b9905d53073fee1bb"
       },
-      "special_block": "shift4Details",
       "specialBlocks": [
         {
           "name": "Countertop EMV/NFC terminals",
@@ -374,19 +382,20 @@
         "barcode",
         "cust_display_r",
         "discounts",
-        "po",
         "gift_cards_r",
         "loyalty_r",
         "cash_drawer",
         "analytics_r",
         "pin_debit",
         "dual_pricing",
-        "pci_r"
+        "printing",
+        "mobile_payments"
       ],
       "summary": "Clover POS for retail provides inventory management, barcode scanning, loyalty, and integrated payments for stores.",
+      "details": [],
       "links": {
         "product": "https://www.clover.com",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/24d8dbb2e4041c917435992c878d18405b394"
       }
     },
     {
@@ -396,14 +405,15 @@
       "tags": [
         "pin_debit",
         "dual_pricing",
-        "pci_r"
+        "printing",
+        "mobile_payments"
       ],
       "summary": "Secure countertop and wireless payment terminals for retail stores supporting EMV, NFC, and simple card acceptance.",
+      "details": [],
       "links": {
         "product": "https://www.signapayse.com",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/8zaf966f327c540a048f5810af952ac50237a"
       },
-      "special_block": "terminalDetails",
       "specialBlocks": [
         {
           "name": "Valor VL100 / VL100 Pro",
@@ -535,14 +545,16 @@
       "tags": [
         "pin_debit",
         "dual_pricing",
-        "pci_r"
+        "pci_r",
+        "printing",
+        "mobile_payments"
       ],
       "summary": "Shift4 retail terminals provide reliable card acceptance with EMV, contactless payments, and PCI compliant processing.",
+      "details": [],
       "links": {
         "product": "https://www.shift4network.com/credit-card-terminals/",
-        "paperwork": "https://www.zoho.com"
+        "paperwork": "https://workdrive.zoho.com/folder/q20adc28c10cbd3464d5b9905d53073fee1bb"
       },
-      "special_block": "shift4Details",
       "specialBlocks": [
         {
           "name": "Countertop EMV/NFC terminals",
@@ -553,24 +565,26 @@
     },
     {
       "id": "test_business",
-      "name": "Test Business",
+      "name": "Figure",
       "category": "Restaurant",
       "tags": [
+        "tips",
         "counter_service",
-        "reservations",
+        "kitchen_printer",
         "inventory_mgmt",
         "loyalty",
-        "labor_mgmt",
-        "payroll",
-        "emv"
+        "gift_cards",
+        "cust_display",
+        "employee_mgmt",
+        "analytics",
+        "receipt_print",
+        "kitchen_display_screen"
       ],
-      "summary": "testing summary",
-      "details": [
-        "testiing details"
-      ],
+      "summary": "Ipad Based POS System",
+      "details": [],
       "links": {
-        "product": "https://google.com",
-        "paperwork": "https://google.com"
+        "product": "https://signapayse.com",
+        "paperwork": "https://workdrive.zoho.com/folder/8zaf966f327c540a048f5810af952ac50237a"
       },
       "specialBlocks": [
         {
