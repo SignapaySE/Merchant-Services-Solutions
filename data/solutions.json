@@ -593,6 +593,29 @@
           "link": ""
         }
       ]
+    },
+    {
+      "id": "bodega_ai_pos",
+      "name": "Bodega AI POS",
+      "category": "Retail",
+      "tags": [
+        "inventory",
+        "barcode",
+        "cust_display_r",
+        "discounts",
+        "gift_cards_r",
+        "loyalty_r",
+        "cash_drawer",
+        "analytics_r",
+        "dual_pricing",
+        "printing"
+      ],
+      "summary": "Bodega AI Retail POS",
+      "details": [],
+      "links": {
+        "product": "https://signapay.com/bodega-ai/",
+        "paperwork": "https://workdrive.zohoexternal.com/external/79450b3924ffa4e058035bb6b01bbb2d287568a02d78e86e72dedeb09f41c27f"
+      }
     }
   ]
 }
