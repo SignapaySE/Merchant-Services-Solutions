@@ -1,20 +1,35 @@
-
 // ======================================
 // Main App Script (app.js)
 // ======================================
 
-// Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
-async function loadAppData() {
-  try {
-    const enabled = localStorage.getItem('solutions_preview_enabled') === '1';
-    const preview = localStorage.getItem('solutions_preview_data');
-    if (enabled && preview) {
-      console.log("⚡ Using preview data from localStorage");
-      return JSON.parse(preview);
+// ---- Data loading (preview-aware + versioned live fetch) ----
+async function loadSolutions() {
+  const v = localStorage.getItem('app_version') || '';
+  const urlParams = new URL(location.href).searchParams;
+
+  // Preview is explicit and session-scoped:
+  // Only if ?preview=1 AND preview exists in sessionStorage AND version matches
+  const previewRequested = urlParams.get('preview') === '1';
+  const pEnabled = sessionStorage.getItem('solutions_preview_enabled') === '1';
+  const pVersion = sessionStorage.getItem('solutions_preview_version') || '';
+  const pDataRaw = sessionStorage.getItem('solutions_preview_data');
+
+  const canUsePreview = previewRequested && pEnabled && pDataRaw && pVersion === v;
+
+  if (canUsePreview) {
+    try {
+      console.log('⚡ Using PREVIEW data from sessionStorage');
+      return JSON.parse(pDataRaw);
+    } catch {
+      console.warn('Preview JSON was invalid. Falling back to live data.');
     }
-  } catch (_) {}
-  const res = await fetch('data/solutions.json', { cache: 'no-store' });
-  return await res.json();
+  }
+
+  // Live fetch (always stamped + no-store → guaranteed fresh)
+  const liveUrl = `data/solutions.json${v ? `?v=${encodeURIComponent(v)}` : ''}`;
+  const res = await fetch(liveUrl, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to load solutions.json');
+  return res.json();
 }
 
 /* ===== State ===== */
@@ -49,15 +64,14 @@ const shift4Details = document.getElementById('shift4Details');
 const specialBlocksSection = document.getElementById('specialBlocksSection');
 const specialBlocksList = document.getElementById('specialBlocksList');
 
-function escapeHTML(s){ 
+/* ===== Utils ===== */
+function escapeHTML(s){
   return String(s ?? "").replace(/[&<>\"']/g, m => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]
-  )); 
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+  ));
 }
 
-
 /* ===== Rendering ===== */
-
 function renderPrompt() {
   if (!promptEl || !promptTextEl) return;
 
@@ -72,7 +86,6 @@ function renderPrompt() {
 
   promptTextEl.textContent = msg;
 }
-
 
 function renderStepper() {
   [...stepper.children].forEach((el, i) => {
@@ -168,7 +181,6 @@ function scoreSolution(item) {
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
 }
 
-
 function makeSolutionCard(item, score) {
   const btn = document.createElement('button');
   btn.type = "button";
@@ -255,23 +267,21 @@ function openAnalysis(item) {
   ).join("");
 
   // Special Blocks (data-driven)
-if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
-  specialBlocksList.innerHTML = item.specialBlocks.map(b => `
-    <li class="rounded-lg border border-slate-700 p-3 text-sm">
-      <div class="font-medium">${escapeHTML(b.name)}</div>
-      <div class="text-xs text-slate-400">${escapeHTML(b.description)}</div>
-      ${b.link ? `<a href="${escapeHTML(b.link)}" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">View product ↗</a>` : ``}
-    </li>
-  `).join("");
-  specialBlocksSection.classList.remove('hidden');
-} else {
-  specialBlocksSection.classList.add('hidden');
-  specialBlocksList.innerHTML = "";
-}
+  if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
+    specialBlocksList.innerHTML = item.specialBlocks.map(b => `
+      <li class="rounded-lg border border-slate-700 p-3 text-sm">
+        <div class="font-medium">${escapeHTML(b.name)}</div>
+        <div class="text-xs text-slate-400">${escapeHTML(b.description)}</div>
+        ${b.link ? `<a href="${escapeHTML(b.link)}" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">View product ↗</a>` : ``}
+      </li>
+    `).join("");
+    specialBlocksSection.classList.remove('hidden');
+  } else {
+    specialBlocksSection.classList.add('hidden');
+    specialBlocksList.innerHTML = "";
+  }
 
-// Hide old hardcoded blocks (now superseded)
-
-
+  // Hide legacy hardcoded blocks (now superseded)
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
 
@@ -279,6 +289,7 @@ if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
   document.documentElement.classList.add('scroll-lock');
   document.body.classList.add('scroll-lock');
 }
+
 function closeModal() {
   modal.classList.add('hidden'); modal.classList.remove('flex');
   openSolution = null;
@@ -287,13 +298,13 @@ function closeModal() {
 }
 
 /* ===== Wire events ===== */
-document.getElementById('modalBackdrop').addEventListener('click', closeModal);
-document.getElementById('modalClose').addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', closeModal);
+modalClose.addEventListener('click', closeModal);
 resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
 
 /* ===== Init ===== */
 async function bootstrap() {
-  DATA = await loadAppData();
+  DATA = await loadSolutions();
   render();
 }
 function render(){ renderStepper(); renderStep1(); renderStep2(); renderStep3(); renderPrompt(); }

@@ -8,48 +8,33 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
-  <!-- Mobile viewport tuned for iOS Safari -->
+  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Merchant Services Solutions</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Baseline tweaks -->
+  <!-- Base tweaks + stepper styles -->
   <style>
     html, body { height: 100%; }
     button, a { touch-action: manipulation; }
     .scroll-lock { overflow: hidden; height: 100%; }
     .modal-scroll { -webkit-overflow-scrolling: touch; }
 
-    /* Chevron stepper styles */
     #stepper { display: flex; gap: 0; }
     #stepper > * { margin: 0; border-radius: 0; position: relative; }
     #stepper > :first-child { border-top-left-radius: .75rem; border-bottom-left-radius: .75rem; }
     #stepper > :last-child  { border-top-right-radius: .75rem; border-bottom-right-radius: .75rem; }
 
-    .step-chev {
-      position: relative;
-      padding-right: 2.25rem; /* space for chevron tip */
-      flex: 1 1 0;
-      text-align: center;
-    }
+    .step-chev { position: relative; padding-right: 2.25rem; flex: 1 1 0; text-align: center; }
     .step-chev::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: -1rem;
-      width: 1.25rem;
-      height: 100%;
-      background: inherit;
-      transform: skewX(30deg);
+      content: ""; position: absolute; top: 0; right: -1rem; width: 1.25rem; height: 100%;
+      background: inherit; transform: skewX(30deg);
       border-right: 1px solid rgba(148,163,184,.35);
       border-top:   1px solid rgba(148,163,184,.35);
       border-bottom:1px solid rgba(148,163,184,.35);
-      border-left: none;
-      border-radius: 0 .5rem .5rem 0;
-      z-index: 1;
-      pointer-events: none;
+      border-left: none; border-radius: 0 .5rem .5rem 0; z-index: 1; pointer-events: none;
     }
     .step-chev.last::after { display: none; }
     .step-chev.inactive { background: transparent; }
@@ -64,12 +49,8 @@
     <header class="relative mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm pr-32 md:pr-44">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
-          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-            Merchant Services Solutions
-          </h1>
-          <p class="text-sm md:text-base text-slate-200/80">
-            Find the perfect product
-          </p>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Merchant Services Solutions</h1>
+          <p class="text-sm md:text-base text-slate-200/80">Find the perfect product</p>
         </div>
       </div>
 
@@ -82,7 +63,7 @@
 
     <!-- Controls row -->
     <div class="mb-4 flex items-center justify-between gap-3">
-     <nav id="stepper" class="mb-6 flex gap-0 flex-1 text-[11px] sm:text-xs">
+      <nav id="stepper" class="mb-6 flex gap-0 flex-1 text-[11px] sm:text-xs">
         <div class="step-chev active  border px-3 py-2">1. Business type</div>
         <div class="step-chev inactive border px-3 py-2">2. Needs</div>
         <div class="step-chev last inactive border px-3 py-2">3. Solutions</div>
@@ -96,16 +77,15 @@
       </button>
     </div>
 
-    <!-- Prompt line -->
+    <!-- Prompt -->
     <p id="categoryPrompt" class="mt-3 mb-2 text-sm text-slate-300 flex items-center justify-center gap-2">
       <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky-300/80"></span>
       <span id="promptText">What type of business are you working with today?</span>
     </p>
 
-    <!-- Step 1 -->
+    <!-- Steps -->
     <section id="step1" class="grid grid-cols-1 gap-3 md:grid-cols-2"></section>
 
-    <!-- Step 2 -->
     <section id="step2" class="hidden">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-slate-100" id="needsTitle">What does this need?</h2>
@@ -121,7 +101,6 @@
       </div>
     </section>
 
-    <!-- Step 3 -->
     <section id="step3" class="hidden">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-slate-100">Recommended solutions</h2>
@@ -141,7 +120,9 @@
           </div>
           <button id="modalClose" type="button" class="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-100 ring-1 ring-slate-700 hover:bg-slate-700">Close</button>
         </div>
+
         <div class="mb-4 flex flex-wrap gap-2" id="modalLinks"></div>
+
         <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="rounded-2xl border border-green-900 bg-green-900/20 p-4">
             <h4 class="mb-2 text-sm font-semibold text-green-300">Matches your selected needs</h4>
@@ -152,17 +133,21 @@
             <ul id="modalMisses" class="list-inside list-disc text-sm text-red-200"></ul>
           </div>
         </div>
+
         <div id="specialBlocksSection" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
           <ul id="specialBlocksList" class="grid grid-cols-1 gap-2 md:grid-cols-2"></ul>
         </div>
+
         <div id="terminalDetails" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
           <h4 class="mb-2 text-sm font-semibold text-slate-200">Available SignaPay terminal models</h4>
           <ul class="grid grid-cols-1 gap-2 md:grid-cols-2"></ul>
         </div>
+
         <div id="shift4Details" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
           <h4 class="mb-2 text-sm font-semibold text-slate-200">Shift4 desktop terminals</h4>
           <ul class="grid grid-cols-1 gap-2 md:grid-cols-2"></ul>
         </div>
+
         <div class="mt-4" id="allFeaturesBlock">
           <h4 class="mb-2 text-sm font-semibold text-slate-200">All features</h4>
           <div id="allFeatures" class="flex flex-wrap gap-2"></div>
@@ -180,7 +165,7 @@
     </footer>
   </div>
 
-  <!-- Version-controlled script loader -->
+  <!-- Version-controlled script loader (also stamps JSON fetches) -->
   <script>
   (async () => {
     let v = '';
@@ -189,9 +174,10 @@
       if (r.ok) v = (await r.text()).trim();
     } catch {}
 
+    const prev = localStorage.getItem('app_version') || '';
     localStorage.setItem('app_version', v || '');
 
-    // Patch fetch globally so solutions.json always gets stamped
+    // Always stamp solutions.json requests with version (fresh data)
     const origFetch = window.fetch;
     window.fetch = (input, init) => {
       if (typeof input === 'string' && input.includes('solutions.json') && v) {
@@ -200,7 +186,7 @@
       return origFetch(input, init);
     };
 
-    // Load main app script with version
+    // Load app code with version
     const s = document.createElement('script');
     s.type = 'module';
     s.src = 'app.js' + (v ? ('?v=' + encodeURIComponent(v)) : '');
