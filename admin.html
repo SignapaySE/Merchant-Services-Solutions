@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+  <script>
+(async () => {
+  try {
+    const r = await fetch('./version.txt', { cache: 'no-store' });
+    const latest = (await r.text()).trim();
+    const cur = localStorage.getItem('app_v');
+    if (cur && cur !== latest) {
+      localStorage.setItem('app_v', latest);
+      const url = new URL(location.href);
+      url.searchParams.set('v', latest);      // change the PAGE url → forces fresh HTML
+      return location.replace(url.toString());
+    }
+    localStorage.setItem('app_v', latest);
+  } catch {}
+})();
+</script>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
