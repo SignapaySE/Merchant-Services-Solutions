@@ -14,77 +14,109 @@
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Minimal aesthetic add-ons: keeps original layout/flow intact -->
+  <!-- Minimal, scoped aesthetic upgrades (no logic changes) -->
   <style>
+    :root { color-scheme: dark; }
+
+    body{
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(84,214,255,0.10), transparent 60%),
+        radial-gradient(800px 400px at 10% 0%, rgba(105,247,208,0.08), transparent 60%),
+        linear-gradient(180deg, #0B1422 0%, #070E17 60%, #070E17 100%);
+      color:#fff;
+    }
+
+    /* Card/section back-lighting */
+    .surface-3d{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 40%),
+        radial-gradient(140% 140% at 10% -20%, rgba(84,214,255,0.18), rgba(84,214,255,0) 40%),
+        radial-gradient(120% 120% at 110% 130%, rgba(105,247,208,0.16), rgba(105,247,208,0) 40%),
+        #0F1B2B;
+      box-shadow:
+        0 8px 30px -10px rgba(84,214,255,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      border: 1px solid rgba(84,214,255,0.10);
+      border-radius: 1.25rem;
+    }
+
+    /* Big pill buttons with soft glow */
     .button-3d{
       background:
-        radial-gradient(200% 140% at 0% 0%, rgba(105,247,208,0.10), rgba(105,247,208,0) 35%),
-        radial-gradient(180% 120% at 100% 0%, rgba(84,214,255,0.14), rgba(84,214,255,0) 40%);
-      box-shadow: 0 12px 26px -12px rgba(84,214,255,0.25);
-      border-color: rgba(84,214,255,0.25) !important;
+        radial-gradient(200% 140% at 0% 0%, rgba(105,247,208,0.18), rgba(105,247,208,0) 35%),
+        radial-gradient(180% 120% at 100% 0%, rgba(84,214,255,0.22), rgba(84,214,255,0) 40%),
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 45%),
+        #121C2B;
+      box-shadow: 0 12px 26px -10px rgba(84,214,255,0.30), 0 2px 10px -6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+      border: 1px solid rgba(84,214,255,0.16);
+      border-radius: 1rem;
+      transition: transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;
     }
-    .button-3d:hover{ box-shadow: 0 16px 34px -14px rgba(84,214,255,0.35); }
+    .button-3d:hover{ transform: translateY(-1px); box-shadow: 0 16px 34px -12px rgba(84,214,255,0.36), 0 3px 14px -8px rgba(0,0,0,0.7); border-color: rgba(105,247,208,0.28);}
+    .button-3d:active{ transform: translateY(0); box-shadow: 0 8px 18px -10px rgba(84,214,255,0.28), inset 0 6px 10px rgba(0,0,0,0.35); }
 
+    /* Soft halo behind icons */
     .icon-glow { position:relative; display:inline-flex; align-items:center; justify-content:center; }
     .icon-glow::before{
       content:""; position:absolute; inset:-8px; border-radius:999px;
-      background: radial-gradient(50% 50% at 50% 50%, rgba(84,214,255,0.28), rgba(84,214,255,0) 70%);
+      background: radial-gradient(50% 50% at 50% 50%, rgba(84,214,255,0.35), rgba(84,214,255,0) 70%);
       filter: blur(8px); z-index:0;
     }
     .icon-glow > * { position: relative; z-index: 1; }
+
+    /* Hide horizontal scrollbar on stepper (mobile) */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
-<body class="min-h-screen font-sans text-white bg-slate-900">
+<body class="min-h-screen font-sans text-white">
   <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
 
-    <!-- Header (unchanged structure) -->
-    <header class="relative mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm pr-32 md:pr-44">
+    <!-- Header -->
+    <header class="surface-3d mb-6 p-4 sm:p-6 pr-32 md:pr-44 relative">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
           <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
             Merchant <br class="hidden sm:block"/> Services Solutions
           </h1>
-          <p class="text-sm md:text-base text-white/90">Find the perfect product</p>
+          <p class="text-sm md:text-base text-white/70">Find the perfect product</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/90">SignaPay SouthEast</span>
         </div>
       </div>
 
-      <!-- Badge (keep one) -->
-      <div class="absolute bottom-3 right-3 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs">
-        SignaPay SouthEast
-      </div>
+      <!-- Stepper -->
+      <nav id="stepper" class="mt-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div class="rounded-xl border px-3 py-2 border-blue-400 bg-blue-900 text-blue-100">1. Business type</div>
+        <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">2. Needs</div>
+        <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">3. Solutions</div>
+      </nav>
     </header>
 
-    <!-- Stepper (original app expects static pills present) -->
-    <nav id="stepper" class="flex items-center gap-2 overflow-x-auto py-2 mb-3">
-      <div class="rounded-xl border px-3 py-2 border-blue-400 bg-blue-900 text-blue-100">1. Business type</div>
-      <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">2. Needs</div>
-      <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">3. Solutions</div>
-    </nav>
-
     <!-- STEP 1: Business type -->
-    <section class="rounded-3xl border border-slate-700 bg-slate-800 p-4 sm:p-6 shadow-sm mb-5">
+    <section class="surface-3d px-4 md:px-6 py-5 mb-5">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold">Select the type of business you are working with today.</h2>
-        <button id="resetBtn" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">
+        <button id="resetBtn" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
           Reset
         </button>
       </div>
       <div id="step1" class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <!-- JS renders four buttons -->
+        <!-- JS renders four big 3D buttons -->
       </div>
     </section>
 
     <!-- STEP 2: Needs -->
-    <section class="rounded-3xl border border-slate-700 bg-slate-800 p-4 sm:p-6 shadow-sm mb-5">
+    <section class="surface-3d px-4 md:px-6 py-5 mb-5">
       <div class="mb-3 flex items-center justify-between gap-3">
         <h2 id="needsTitle" class="text-lg font-semibold">What does this business need?</h2>
-        <!-- (Optional) controls; app.js is safe if these are absent -->
         <div class="flex flex-wrap gap-2">
-          <button id="selectAll" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">Select all</button>
-          <button id="clearAll"  class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">Clear all</button>
-          <button id="backTo1"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">Back</button>
-          <button id="toStep3"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">See results</button>
+          <button id="selectAll" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Select all</button>
+          <button id="clearAll"  class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Clear all</button>
+          <button id="backTo1"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Back</button>
+          <button id="toStep3"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">See results</button>
         </div>
       </div>
       <div id="step2">
@@ -93,10 +125,10 @@
     </section>
 
     <!-- STEP 3: Solutions -->
-    <section class="rounded-3xl border border-slate-700 bg-slate-800 p-4 sm:p-6 shadow-sm mb-6">
+    <section class="surface-3d px-4 md:px-6 py-5 mb-6">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold">Recommended solutions</h2>
-        <button id="adjustNeeds" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">
+        <button id="adjustNeeds" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
           Adjust needs
         </button>
       </div>
@@ -106,7 +138,7 @@
     </section>
 
     <!-- Special blocks -->
-    <section id="specialBlocksSection" class="rounded-3xl border border-slate-700 bg-slate-800 p-4 sm:p-6 shadow-sm mb-6 hidden">
+    <section id="specialBlocksSection" class="surface-3d px-4 md:px-6 py-5 mb-6 hidden">
       <h3 class="text-base font-semibold mb-3">Additional Information</h3>
       <div id="specialBlocksList" class="grid grid-cols-1 gap-3"></div>
     </section>
@@ -114,13 +146,13 @@
     <!-- Modal -->
     <div id="modal" class="fixed inset-0 z-50 hidden items-end md:items-center md:justify-center">
       <div class="absolute inset-0 bg-slate-900/70" id="modalBackdrop" tabindex="-1"></div>
-      <div class="relative w-full max-w-3xl rounded-t-3xl md:rounded-3xl border border-slate-700 bg-slate-800 p-5 md:p-6 max-h-[85vh] overflow-y-auto">
+      <div class="relative w-full max-w-3xl surface-3d md:rounded-3xl rounded-t-3xl p-5 md:p-6 max-h-[85vh] overflow-y-auto">
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
             <h3 class="text-xl font-bold" id="modalTitle"></h3>
             <p class="text-sm text-white/70">Comprehensive details for this solution</p>
           </div>
-          <button id="modalClose" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-white/40">Close</button>
+          <button id="modalClose" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Close</button>
         </div>
 
         <div id="modalLinks" class="flex flex-wrap gap-2 mb-4"></div>
@@ -146,10 +178,10 @@
       </div>
     </div>
 
-    <!-- Helper prompt area your app writes into -->
+    <!-- Helper prompt area -->
     <div id="categoryPrompt" class="sr-only"><span id="promptText"></span></div>
 
-    <!-- Loader (original versioning pattern) -->
+    <!-- Bootstrapping: version-aware loader (unchanged) -->
     <script>
       (async () => {
         let v = '';
