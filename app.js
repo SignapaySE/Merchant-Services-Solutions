@@ -102,37 +102,46 @@ function renderStepper() {
   });
 }
 
-function makeTypeButton(label, icon) {
+function makeTypeButton(label, iconSvg) {
   const btn = document.createElement('button');
   btn.type = "button";
-  btn.className =
-    "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700";
+  btn.className = "button-3d group flex w-full items-center gap-4 p-5 text-left";
   btn.onclick = () => { bizType = label; step = 2; render(); };
 
-  const iconDiv = document.createElement('div');
-  iconDiv.className = "text-lg";
-  iconDiv.textContent = icon;
+  const iconWrap = document.createElement('span');
+  iconWrap.className = "icon-glow relative inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/5 border border-white/10";
+  iconWrap.innerHTML = `<span class="relative z-10 block w-6 h-6 text-cyan-300" aria-hidden="true">${iconSvg}</span>`;
 
   const left = document.createElement('div');
-  left.className = "flex-1 text-left";
+  left.className = "flex-1";
   left.innerHTML = `
-    <div class="font-semibold text-slate-100">${label}</div>
-    <div class="text-xs text-slate-400">Tap to select this business type</div>
+    <div class="font-semibold text-slate-100 text-lg">${label}</div>
+    <!-- removed the 'Tap to select' line -->
   `;
 
-  const bullet = document.createElement('div');
-  bullet.className = "h-5 w-5 rounded-full border border-slate-600";
+  const arrow = document.createElement('span');
+  arrow.className = "ml-auto inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 bg-white/5 transition group-hover:translate-x-0.5";
+  arrow.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white/80"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-  btn.append(iconDiv, left, bullet);
+  btn.append(iconWrap, left, arrow);
   return btn;
 }
+
 
 function renderStep1() {
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
-  const map = { Restaurant: "🍽️", Retail: "🛍️", Service: "🛠️", Ecommerce: "🛒" };
-  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "💼")));
+
+  const map = {
+    Restaurant: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 3v6a3 3 0 0 0 6 0V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 9h10v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 9v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    Retail:     `<svg viewBox="0 0 24 24" fill="none"><path d="M3 7h18l-2 10H5L3 7z" stroke="currentColor" stroke-width="2"/><path d="M16 7a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="2"/></svg>`,
+    Service:    `<svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M8 16l-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M17 5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    Ecommerce:  `<svg viewBox="0 0 24 24" fill="none"><path d="M6 6h15l-2 9H8L6 6z" stroke="currentColor" stroke-width="2"/><path d="M6 6l-2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="19" r="1.5" fill="currentColor"/><circle cx="17" cy="19" r="1.5" fill="currentColor"/></svg>`
+  };
+
+  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "")));
 }
+
 
 function renderStep2() {
   step2.classList.toggle('hidden', step !== 2);
@@ -188,7 +197,7 @@ function makeSolutionCard(item, score) {
   btn.onclick = () => openAnalysis(item);
 
   const card = document.createElement('div');
-  card.className = "rounded-2xl border border-blue-500/40 bg-slate-800 p-4 shadow-sm transition hover:shadow-md";
+  card.className = "surface-3d p-4 transition hover:shadow-[0_16px_34px_-12px_rgba(84,214,255,.36)]";
 
   const top = document.createElement('div');
   top.className = "mb-1 flex items-start justify-between gap-3";
