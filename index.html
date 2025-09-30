@@ -8,17 +8,16 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
+  <!-- Mobile viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Merchant Services Solutions</title>
 
-  <!-- Tailwind via CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Minimal, scoped aesthetic upgrades (no logic changes) -->
+  <!-- Visual upgrades only -->
   <style>
-    :root { color-scheme: dark; }
-
-    body{
+    body {
       background:
         radial-gradient(1200px 600px at 80% -10%, rgba(84,214,255,0.10), transparent 60%),
         radial-gradient(800px 400px at 10% 0%, rgba(105,247,208,0.08), transparent 60%),
@@ -26,45 +25,55 @@
       color:#fff;
     }
 
-    /* Card/section back-lighting */
-    .surface-3d{
+    /* Sections with subtle glow */
+    .surface-3d {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 40%),
         radial-gradient(140% 140% at 10% -20%, rgba(84,214,255,0.18), rgba(84,214,255,0) 40%),
         radial-gradient(120% 120% at 110% 130%, rgba(105,247,208,0.16), rgba(105,247,208,0) 40%),
         #0F1B2B;
-      box-shadow:
-        0 8px 30px -10px rgba(84,214,255,0.25),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+      box-shadow: 0 8px 30px -10px rgba(84,214,255,0.25),
+                  inset 0 1px 0 rgba(255,255,255,0.06);
       border: 1px solid rgba(84,214,255,0.10);
       border-radius: 1.25rem;
     }
 
-    /* Big pill buttons with soft glow */
-    .button-3d{
+    /* Big 3D/glow buttons */
+    .button-3d {
       background:
         radial-gradient(200% 140% at 0% 0%, rgba(105,247,208,0.18), rgba(105,247,208,0) 35%),
         radial-gradient(180% 120% at 100% 0%, rgba(84,214,255,0.22), rgba(84,214,255,0) 40%),
         linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 45%),
         #121C2B;
-      box-shadow: 0 12px 26px -10px rgba(84,214,255,0.30), 0 2px 10px -6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+      box-shadow: 0 12px 26px -10px rgba(84,214,255,0.30),
+                  0 2px 10px -6px rgba(0,0,0,0.6),
+                  inset 0 1px 0 rgba(255,255,255,0.08);
       border: 1px solid rgba(84,214,255,0.16);
       border-radius: 1rem;
-      transition: transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;
+      transition: transform .15s cubic-bezier(.2,.8,.2,1),
+                  box-shadow .2s ease, border-color .2s ease;
     }
-    .button-3d:hover{ transform: translateY(-1px); box-shadow: 0 16px 34px -12px rgba(84,214,255,0.36), 0 3px 14px -8px rgba(0,0,0,0.7); border-color: rgba(105,247,208,0.28);}
-    .button-3d:active{ transform: translateY(0); box-shadow: 0 8px 18px -10px rgba(84,214,255,0.28), inset 0 6px 10px rgba(0,0,0,0.35); }
+    .button-3d:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px -12px rgba(84,214,255,0.36),
+                  0 3px 14px -8px rgba(0,0,0,0.7);
+      border-color: rgba(105,247,208,0.28);
+    }
+    .button-3d:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 18px -10px rgba(84,214,255,0.28),
+                  inset 0 6px 10px rgba(0,0,0,0.35);
+    }
 
-    /* Soft halo behind icons */
-    .icon-glow { position:relative; display:inline-flex; align-items:center; justify-content:center; }
-    .icon-glow::before{
+    /* Icon halo */
+    .icon-glow { position:relative; display:inline-flex; }
+    .icon-glow::before {
       content:""; position:absolute; inset:-8px; border-radius:999px;
       background: radial-gradient(50% 50% at 50% 50%, rgba(84,214,255,0.35), rgba(84,214,255,0) 70%);
       filter: blur(8px); z-index:0;
     }
     .icon-glow > * { position: relative; z-index: 1; }
 
-    /* Hide horizontal scrollbar on stepper (mobile) */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -74,7 +83,7 @@
   <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
 
     <!-- Header -->
-    <header class="surface-3d mb-6 p-4 sm:p-6 pr-32 md:pr-44 relative">
+    <header class="surface-3d mb-6 p-4 sm:p-6 relative">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
           <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
@@ -82,9 +91,7 @@
           </h1>
           <p class="text-sm md:text-base text-white/70">Find the perfect product</p>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/90">SignaPay SouthEast</span>
-        </div>
+        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/90">SignaPay SouthEast</span>
       </div>
 
       <!-- Stepper -->
@@ -95,21 +102,20 @@
       </nav>
     </header>
 
-    <!-- STEP 1: Business type -->
+    <!-- STEP 1 -->
     <section class="surface-3d px-4 md:px-6 py-5 mb-5">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold">Select the type of business you are working with today.</h2>
-        <button id="resetBtn" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
+        <button id="resetBtn" type="button"
+          class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
           Reset
         </button>
       </div>
-      <div id="step1" class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <!-- JS renders four big 3D buttons -->
-      </div>
+      <div id="step1" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
     </section>
 
-    <!-- STEP 2: Needs -->
-    <section class="surface-3d px-4 md:px-6 py-5 mb-5">
+    <!-- STEP 2 -->
+    <section class="surface-3d px-4 md:px-6 py-5 mb-5 hidden" id="step2">
       <div class="mb-3 flex items-center justify-between gap-3">
         <h2 id="needsTitle" class="text-lg font-semibold">What does this business need?</h2>
         <div class="flex flex-wrap gap-2">
@@ -119,28 +125,19 @@
           <button id="toStep3"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">See results</button>
         </div>
       </div>
-      <div id="step2">
-        <div id="needsGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"></div>
-      </div>
+      <div id="needsGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"></div>
     </section>
 
-    <!-- STEP 3: Solutions -->
-    <section class="surface-3d px-4 md:px-6 py-5 mb-6">
+    <!-- STEP 3 -->
+    <section class="surface-3d px-4 md:px-6 py-5 mb-6 hidden" id="step3">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold">Recommended solutions</h2>
-        <button id="adjustNeeds" type="button" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
+        <button id="adjustNeeds" type="button"
+          class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">
           Adjust needs
         </button>
       </div>
-      <div id="step3">
-        <div id="solutionsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
-      </div>
-    </section>
-
-    <!-- Special blocks -->
-    <section id="specialBlocksSection" class="surface-3d px-4 md:px-6 py-5 mb-6 hidden">
-      <h3 class="text-base font-semibold mb-3">Additional Information</h3>
-      <div id="specialBlocksList" class="grid grid-cols-1 gap-3"></div>
+      <div id="solutionsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
     </section>
 
     <!-- Modal -->
@@ -178,10 +175,10 @@
       </div>
     </div>
 
-    <!-- Helper prompt area -->
+    <!-- Prompt (hidden helper) -->
     <div id="categoryPrompt" class="sr-only"><span id="promptText"></span></div>
 
-    <!-- Bootstrapping: version-aware loader (unchanged) -->
+    <!-- Versioned app.js loader (unchanged) -->
     <script>
       (async () => {
         let v = '';
@@ -190,7 +187,6 @@
           if (r.ok) v = (await r.text()).trim();
         } catch {}
 
-        // Cache-bust solutions.json via fetch wrapper
         const origFetch = window.fetch;
         window.fetch = (input, init) => {
           if (typeof input === 'string' && input.includes('solutions.json') && v) {
@@ -199,7 +195,6 @@
           return origFetch(input, init);
         };
 
-        // Load the app code with the same version
         const s = document.createElement('script');
         s.type = 'module';
         s.src = 'app.js' + (v ? ('?v=' + encodeURIComponent(v)) : '');

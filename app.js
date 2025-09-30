@@ -1,12 +1,14 @@
-// ====================================== 
+// ======================================
 // Main App Script (app.js)
 // ======================================
 
-// ---- Data loading (version-aware, unchanged) ----
+// ---- Data loading (preview-aware + versioned live fetch) ----
 async function loadSolutions() {
   const v = localStorage.getItem('app_version') || '';
   const urlParams = new URL(location.href).searchParams;
 
+  // Preview is explicit and session-scoped:
+  // Only if ?preview=1 AND preview exists in sessionStorage AND version matches
   const previewRequested = urlParams.get('preview') === '1';
   const pEnabled = sessionStorage.getItem('solutions_preview_enabled') === '1';
   const pVersion = sessionStorage.getItem('solutions_preview_version') || '';
@@ -15,11 +17,16 @@ async function loadSolutions() {
   const canUsePreview = previewRequested && pEnabled && pDataRaw && pVersion === v;
 
   if (canUsePreview) {
-    try { return JSON.parse(pDataRaw); }
-    catch { console.warn('Preview JSON invalid. Using live data.'); }
+    try {
+      console.log('⚡ Using PREVIEW data from sessionStorage');
+      return JSON.parse(pDataRaw);
+    } catch {
+      console.warn('Preview JSON was invalid. Falling back to live data.');
+    }
   }
 
-  const liveUrl = `./solutions.json${v ? `?v=${encodeURIComponent(v)}` : ''}`;
+  // Live fetch (always stamped + no-store → guaranteed fresh)
+  const liveUrl = `data/solutions.json${v ? `?v=${encodeURIComponent(v)}` : ''}`;
   const res = await fetch(liveUrl, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to load solutions.json');
   return res.json();
@@ -64,19 +71,23 @@ function escapeHTML(s){
   ));
 }
 
-/* ===== Prompt (unchanged) ===== */
+/* ===== Rendering ===== */
 function renderPrompt() {
   if (!promptEl || !promptTextEl) return;
+
   let msg = '';
-  if (step === 1) msg = 'What type of business are you working with today?';
-  else if (step === 2) msg = `Select the needs/features for this ${bizType || 'business'}.`;
-  else if (step === 3) msg = 'Here are your matches (highest score first). Tap a card to see details.';
+  if (step === 1) {
+    msg = 'What type of business are you working with today?';
+  } else if (step === 2) {
+    msg = `Select the needs/features for this ${bizType || 'business'}.`;
+  } else if (step === 3) {
+    msg = 'Here are your matches (highest score first). Tap a card to see details.';
+  }
+
   promptTextEl.textContent = msg;
 }
 
-/* ===== Stepper (unchanged) ===== */
 function renderStepper() {
-  if (!stepper) return;
   [...stepper.children].forEach((el, i) => {
     const idx = i + 1;
     const active = step === idx;
@@ -91,76 +102,43 @@ function renderStepper() {
   });
 }
 
-/* ===== Step 1 ===== */
-/* Crisp inline SVG icons (replace old emoji) */
-const CATEGORY_ICONS = {
-  Restaurant: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M4 3v6a3 3 0 0 0 6 0V3"></path>
-      <path d="M10 9h10v12"></path>
-      <path d="M15 9v12"></path>
-    </svg>`,
-  Retail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M3 7h18l-2 10H5L3 7z"></path>
-      <path d="M16 7a4 4 0 0 1-8 0"></path>
-    </svg>`,
-  Service: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M3 21l3-3"></path>
-      <path d="M7 7l10 10"></path>
-      <path d="M17 5l3 3"></path>
-    </svg>`,
-  Ecommerce: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M6 6h15l-2 9H8L6 6z"></path>
-      <path d="M6 6l-2-2"></path>
-      <circle cx="9" cy="19" r="1.5" fill="currentColor"></circle>
-      <circle cx="17" cy="19" r="1.5" fill="currentColor"></circle>
-    </svg>`
-};
-
-function makeTypeButton(label) {
+function makeTypeButton(label, icon) {
   const btn = document.createElement('button');
   btn.type = "button";
-  // Original base classes + a small 3D/glow enhancement
   btn.className =
-    "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700 button-3d";
+    "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700";
   btn.onclick = () => { bizType = label; step = 2; render(); };
 
   const iconDiv = document.createElement('div');
-  iconDiv.className = "text-lg icon-glow text-cyan-300";
-  iconDiv.innerHTML = CATEGORY_ICONS[label] || "";
+  iconDiv.className = "text-lg";
+  iconDiv.textContent = icon;
 
   const left = document.createElement('div');
   left.className = "flex-1 text-left";
-  left.innerHTML = `<div class="font-semibold">${label}</div>`;
+  left.innerHTML = `
+    <div class="font-semibold text-slate-100">${label}</div>
+    <div class="text-xs text-slate-400">Tap to select this business type</div>
+  `;
 
   const bullet = document.createElement('div');
-  bullet.className = "h-5 w-5 rounded-full border border-slate-600 flex items-center justify-center";
-  bullet.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+  bullet.className = "h-5 w-5 rounded-full border border-slate-600";
 
   btn.append(iconDiv, left, bullet);
   return btn;
 }
 
 function renderStep1() {
-  if (!step1) return;
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
-  if (step !== 1) return;
-  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t)));
+  const map = { Restaurant: "🍽️", Retail: "🛍️", Service: "🛠️", Ecommerce: "🛒" };
+  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "💼")));
 }
 
-/* ===== Step 2 (unchanged logic) ===== */
 function renderStep2() {
-  if (!step2) return;
   step2.classList.toggle('hidden', step !== 2);
   if (step !== 2) return;
-
   needsTitle.textContent = `What does this ${bizType} need?`;
   needsGrid.innerHTML = "";
-
   const menu = (DATA.features[bizType] || []);
   menu.forEach(f => {
     const label = document.createElement('label');
@@ -183,18 +161,12 @@ function renderStep2() {
     needsGrid.appendChild(label);
   });
 
-  const selAll = document.getElementById('selectAll');
-  const clrAll = document.getElementById('clearAll');
-  const back1  = document.getElementById('backTo1');
-  const next3  = document.getElementById('toStep3');
-
-  if (selAll) selAll.onclick = () => { selected = menu.map(m=>m.label); renderStep2(); };
-  if (clrAll) clrAll.onclick = () => { selected = []; renderStep2(); };
-  if (back1)  back1.onclick  = () => { step = 1; render(); };
-  if (next3)  next3.onclick  = () => { step = 3; render(); };
+  document.getElementById('selectAll').onclick = () => { selected = menu.map(m=>m.label); renderStep2(); };
+  document.getElementById('clearAll').onclick = () => { selected = []; renderStep2(); };
+  document.getElementById('backTo1').onclick = () => { step = 1; render(); };
+  document.getElementById('toStep3').onclick  = () => { step = 3; render(); };
 }
 
-/* ===== Scoring (unchanged) ===== */
 function scoreSolution(item) {
   if (selected.length === 0) return 100;
 
@@ -209,7 +181,6 @@ function scoreSolution(item) {
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
 }
 
-/* ===== Cards (unchanged structure) ===== */
 function makeSolutionCard(item, score) {
   const btn = document.createElement('button');
   btn.type = "button";
@@ -246,17 +217,13 @@ function makeSolutionCard(item, score) {
   return btn;
 }
 
-/* ===== Step 3 (unchanged logic) ===== */
 function renderStep3() {
-  if (!step3) return;
   step3.classList.toggle('hidden', step !== 3);
   if (step !== 3) return;
-
   solutionsGrid.innerHTML = "";
   const pool = DATA.solutions.filter(c => c.category === bizType);
   const scored = pool.map(item => ({ item, score: scoreSolution(item) }))
                      .sort((a,b) => b.score - a.score);
-
   if (scored.length === 0) {
     const empty = document.createElement('div');
     empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
@@ -265,10 +232,10 @@ function renderStep3() {
   } else {
     scored.forEach(({item, score}) => solutionsGrid.appendChild(makeSolutionCard(item, score)));
   }
-  if (adjustNeedsBtn) adjustNeedsBtn.onclick = () => { step = 2; render(); };
+  adjustNeedsBtn.onclick = () => { step = 2; render(); };
 }
 
-/* ===== Modal control (unchanged) ===== */
+/* ===== Modal control ===== */
 function openAnalysis(item) {
   openSolution = item;
 
@@ -296,10 +263,25 @@ function openAnalysis(item) {
   modalMisses.innerHTML = selected.length ? misses.map(f => `<li>${f}</li>`).join("") : "<li>No needs selected.</li>";
 
   allFeatures.innerHTML = (item.tags || []).map(t =>
-    `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${escapeHTML(featLabels[t]||t)}</span>`
+    `<span class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs text-slate-200">${featLabels[t]||t}</span>`
   ).join("");
 
-  // Keep legacy blocks hidden
+  // Special Blocks (data-driven)
+  if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
+    specialBlocksList.innerHTML = item.specialBlocks.map(b => `
+      <li class="rounded-lg border border-slate-700 p-3 text-sm">
+        <div class="font-medium">${escapeHTML(b.name)}</div>
+        <div class="text-xs text-slate-400">${escapeHTML(b.description)}</div>
+        ${b.link ? `<a href="${escapeHTML(b.link)}" target="_blank" rel="noreferrer" class="mt-2 inline-block text-xs font-medium text-blue-300 underline">View product ↗</a>` : ``}
+      </li>
+    `).join("");
+    specialBlocksSection.classList.remove('hidden');
+  } else {
+    specialBlocksSection.classList.add('hidden');
+    specialBlocksList.innerHTML = "";
+  }
+
+  // Hide legacy hardcoded blocks (now superseded)
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
 
@@ -315,10 +297,10 @@ function closeModal() {
   document.body.classList.remove('scroll-lock');
 }
 
-/* ===== Wire events (unchanged) ===== */
-if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
-if (modalClose)    modalClose.addEventListener('click', closeModal);
-if (resetBtn)      resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
+/* ===== Wire events ===== */
+modalBackdrop.addEventListener('click', closeModal);
+modalClose.addEventListener('click', closeModal);
+resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
 
 /* ===== Init ===== */
 async function bootstrap() {
