@@ -1,14 +1,12 @@
-// ======================================
+// ====================================== 
 // Main App Script (app.js)
 // ======================================
 
-// ---- Data loading (preview-aware + versioned live fetch) ----
+// ---- Data loading (version-aware) ----
 async function loadSolutions() {
   const v = localStorage.getItem('app_version') || '';
   const urlParams = new URL(location.href).searchParams;
 
-  // Preview is explicit and session-scoped:
-  // Only if ?preview=1 AND preview exists in sessionStorage AND version matches
   const previewRequested = urlParams.get('preview') === '1';
   const pEnabled = sessionStorage.getItem('solutions_preview_enabled') === '1';
   const pVersion = sessionStorage.getItem('solutions_preview_version') || '';
@@ -18,14 +16,12 @@ async function loadSolutions() {
 
   if (canUsePreview) {
     try {
-      console.log('⚡ Using PREVIEW data from sessionStorage');
       return JSON.parse(pDataRaw);
     } catch {
-      console.warn('Preview JSON was invalid. Falling back to live data.');
+      console.warn('Preview JSON invalid. Using live data.');
     }
   }
 
-  // Live fetch (cache-busted). Use the original location next to index.html.
   const liveUrl = `./solutions.json${v ? `?v=${encodeURIComponent(v)}` : ''}`;
   const res = await fetch(liveUrl, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to load solutions.json');
@@ -64,38 +60,6 @@ const shift4Details = document.getElementById('shift4Details');
 const specialBlocksSection = document.getElementById('specialBlocksSection');
 const specialBlocksList = document.getElementById('specialBlocksList');
 
-// --- icons (lucide-style) ---
-const CATEGORY_ICONS = {
-  Restaurant: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M4 3v6a3 3 0 0 0 6 0V3"></path>
-      <path d="M10 9h10v12"></path>
-      <path d="M15 9v12"></path>
-    </svg>`,
-  Retail: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M3 7h18l-2 10H5L3 7z"></path>
-      <path d="M16 7a4 4 0 0 1-8 0"></path>
-    </svg>`,
-  Service: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M3 21l3-3"></path>
-      <path d="M7 7l10 10"></path>
-      <path d="M17 5l3 3"></path>
-    </svg>`,
-  Ecommerce: `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-      <path d="M6 6h15l-2 9H8L6 6z"></path>
-      <path d="M6 6l-2-2"></path>
-      <circle cx="9" cy="19" r="1.5" fill="currentColor"></circle>
-      <circle cx="17" cy="19" r="1.5" fill="currentColor"></circle>
-    </svg>`
-};
-
 /* ===== Utils ===== */
 function escapeHTML(s){
   return String(s ?? "").replace(/[&<>\"']/g, m => (
@@ -103,18 +67,23 @@ function escapeHTML(s){
   ));
 }
 
-/* ===== Rendering ===== */
+/* ===== Prompt ===== */
 function renderPrompt() {
   if (!promptEl || !promptTextEl) return;
 
   let msg = '';
-  if (step === 1) msg = 'What type of business are you working with today?';
-  else if (step === 2) msg = `Select the needs/features for this ${bizType || 'business'}.`;
-  else if (step === 3) msg = 'Here are your matches (highest score first). Tap a card to see details.';
+  if (step === 1) {
+    msg = 'What type of business are you working with today?';
+  } else if (step === 2) {
+    msg = `Select the needs/features for this ${bizType || 'business'}.`;
+  } else if (step === 3) {
+    msg = 'Here are your matches (highest score first). Tap a card to see details.';
+  }
 
   promptTextEl.textContent = msg;
 }
 
+/* ===== Stepper ===== */
 function renderStepper() {
   if (!stepper) return;
   [...stepper.children].forEach((el, i) => {
@@ -131,27 +100,58 @@ function renderStepper() {
   });
 }
 
-function makeTypeButton(label) {
+/* ===== Step 1 ===== */
+/* SVG icons (lucide-style) replacing the original emojis */
+const CATEGORY_ICONS = {
+  Restaurant: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+      <path d="M4 3v6a3 3 0 0 0 6 0V3"></path>
+      <path d="M10 9h10v12"></path>
+      <path d="M15 9v12"></path>
+    </svg>`,
+  Retail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+      <path d="M3 7h18l-2 10H5L3 7z"></path>
+      <path d="M16 7a4 4 0 0 1-8 0"></path>
+    </svg>`,
+  Service: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+      <path d="M3 21l3-3"></path>
+      <path d="M7 7l10 10"></path>
+      <path d="M17 5l3 3"></path>
+    </svg>`,
+  Ecommerce: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+      <path d="M6 6h15l-2 9H8L6 6z"></path>
+      <path d="M6 6l-2-2"></path>
+      <circle cx="9" cy="19" r="1.5" fill="currentColor"></circle>
+      <circle cx="17" cy="19" r="1.5" fill="currentColor"></circle>
+    </svg>`
+};
+
+function makeTypeButton(label, iconSvg) {
   const btn = document.createElement('button');
   btn.type = "button";
-  btn.className = "button-3d group flex w-full items-center gap-4 p-5 text-left";
+  // original classes + a tiny aesthetic class (button-3d)
+  btn.className =
+    "group flex w-full items-center gap-3 rounded-2xl border p-4 transition border-slate-700 bg-slate-800 hover:bg-slate-700 button-3d";
   btn.onclick = () => { bizType = label; step = 2; render(); };
 
-  const iconWrap = document.createElement('span');
-  iconWrap.className = "icon-glow relative inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/5 border border-white/10 text-cyan-300";
-  const iconSvg = CATEGORY_ICONS[label] || "";
-  iconWrap.innerHTML = `<span class="relative z-10">${iconSvg}</span>`;
+  const iconDiv = document.createElement('div');
+  iconDiv.className = "text-lg icon-glow text-cyan-300";
+  iconDiv.innerHTML = iconSvg;
 
   const left = document.createElement('div');
-  left.className = "flex-1";
-  left.innerHTML = `<div class="font-semibold text-slate-100 text-lg">${label}</div>`;
+  left.className = "flex-1 text-left";
+  left.innerHTML = `
+    <div class="font-semibold">${label}</div>
+    <div class="text-xs text-slate-300/70"> </div>
+  `;
 
-  const arrow = document.createElement('span');
-  arrow.className = "ml-auto inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 bg-white/5 transition group-hover:translate-x-0.5";
-  arrow.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-white/80">
-    <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const bullet = document.createElement('div');
+  bullet.className = "h-5 w-5 rounded-full border border-slate-600";
 
-  btn.append(iconWrap, left, arrow);
+  btn.append(iconDiv, left, bullet);
   return btn;
 }
 
@@ -160,14 +160,16 @@ function renderStep1() {
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
   if (step !== 1) return;
-  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t)));
+
+  const map = CATEGORY_ICONS; // use SVG map
+  DATA.categories.forEach(t => step1.appendChild(makeTypeButton(t, map[t] || "")));
 }
 
+/* ===== Step 2 ===== */
 function renderStep2() {
   if (!step2) return;
   step2.classList.toggle('hidden', step !== 2);
   if (step !== 2) return;
-
   needsTitle.textContent = `What does this ${bizType} need?`;
   needsGrid.innerHTML = "";
 
@@ -193,7 +195,6 @@ function renderStep2() {
     needsGrid.appendChild(label);
   });
 
-  // Safely bind the control buttons if they exist
   const selAll = document.getElementById('selectAll');
   const clrAll = document.getElementById('clearAll');
   const back1  = document.getElementById('backTo1');
@@ -205,6 +206,7 @@ function renderStep2() {
   if (next3)  next3.onclick  = () => { step = 3; render(); };
 }
 
+/* ===== Scoring ===== */
 function scoreSolution(item) {
   if (selected.length === 0) return 100;
 
@@ -219,6 +221,7 @@ function scoreSolution(item) {
   return Math.round((overlap / Math.max(selected.length, 1)) * 100);
 }
 
+/* ===== Cards ===== */
 function makeSolutionCard(item, score) {
   const btn = document.createElement('button');
   btn.type = "button";
@@ -226,7 +229,7 @@ function makeSolutionCard(item, score) {
   btn.onclick = () => openAnalysis(item);
 
   const card = document.createElement('div');
-  card.className = "surface-3d p-4 transition hover:shadow-[0_16px_34px_-12px_rgba(84,214,255,.36)]";
+  card.className = "rounded-2xl border border-blue-500/40 bg-slate-800 p-4 shadow-sm transition hover:shadow-md";
 
   const top = document.createElement('div');
   top.className = "mb-1 flex items-start justify-between gap-3";
@@ -255,6 +258,7 @@ function makeSolutionCard(item, score) {
   return btn;
 }
 
+/* ===== Step 3 ===== */
 function renderStep3() {
   if (!step3) return;
   step3.classList.toggle('hidden', step !== 3);
@@ -322,7 +326,7 @@ function openAnalysis(item) {
     specialBlocksList.innerHTML = "";
   }
 
-  // Hide legacy hardcoded blocks (now superseded)
+  // Hide legacy hardcoded blocks (kept from original)
   terminalDetails.classList.add('hidden');
   shift4Details.classList.add('hidden');
 
