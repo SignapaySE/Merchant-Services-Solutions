@@ -15,21 +15,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* === your existing styles can stay === */
-
-    /* === 3D / Glow Design Tokens (adds the new look) === */
-    :root { color-scheme: dark; }
-
-    body{
+    /* ======================= Scoped Neon Theme ======================= */
+    .theme-neon {
+      color-scheme: dark;
+      color: #fff;
+      /* page background */
       background:
         radial-gradient(1200px 600px at 80% -10%, rgba(84,214,255,0.10), transparent 60%),
         radial-gradient(800px 400px at 10% 0%, rgba(105,247,208,0.08), transparent 60%),
         linear-gradient(180deg, #0B1422 0%, #070E17 60%, #070E17 100%);
-      color:#fff;
     }
 
     /* Card-like container with subtle inner light */
-    .surface-3d{
+    .theme-neon .surface-3d{
       background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 40%),
                   radial-gradient(140% 140% at 10% -20%, rgba(84,214,255,0.20), rgba(84,214,255,0) 40%),
                   radial-gradient(120% 120% at 110% 130%, rgba(105,247,208,0.18), rgba(105,247,208,0) 40%),
@@ -40,7 +38,7 @@
     }
 
     /* Big pill buttons with 3D lighting */
-    .button-3d{
+    .theme-neon .button-3d{
       background: radial-gradient(200% 140% at 0% 0%, rgba(105,247,208,0.18), rgba(105,247,208,0) 35%),
                   radial-gradient(180% 120% at 100% 0%, rgba(84,214,255,0.22), rgba(84,214,255,0) 40%),
                   linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 45%),
@@ -50,25 +48,25 @@
       border-radius: 1rem;
       transition: transform .15s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;
     }
-    .button-3d:hover{ transform: translateY(-1px); box-shadow: 0 16px 34px -12px rgba(84,214,255,0.36), 0 3px 14px -8px rgba(0,0,0,0.7); border-color: rgba(105,247,208,0.28);}
-    .button-3d:active{ transform: translateY(0); box-shadow: 0 8px 18px -10px rgba(84,214,255,0.28), inset 0 6px 10px rgba(0,0,0,0.35); }
+    .theme-neon .button-3d:hover{ transform: translateY(-1px); box-shadow: 0 16px 34px -12px rgba(84,214,255,0.36), 0 3px 14px -8px rgba(0,0,0,0.7); border-color: rgba(105,247,208,0.28);}
+    .theme-neon .button-3d:active{ transform: translateY(0); box-shadow: 0 8px 18px -10px rgba(84,214,255,0.28), inset 0 6px 10px rgba(0,0,0,0.35); }
 
     /* Soft halo behind icons */
-    .icon-glow { position:relative; }
-    .icon-glow::before{
+    .theme-neon .icon-glow { position:relative; }
+    .theme-neon .icon-glow::before{
       content:""; position:absolute; inset:-8px; border-radius:999px;
       background: radial-gradient(50% 50% at 50% 50%, rgba(84,214,255,0.35), rgba(84,214,255,0) 70%);
       filter: blur(8px); z-index:0;
     }
 
-    /* Optional: hide horizontal scrollbar on stepper (mobile) */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Hide horizontal scrollbar on stepper (mobile) */
+    .theme-neon .no-scrollbar::-webkit-scrollbar { display: none; }
+    .theme-neon .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
-<body class="min-h-screen font-sans">
-  <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
+<body class="min-h-screen font-sans text-white">
+  <div class="theme-neon mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
 
     <!-- Header -->
     <header class="surface-3d mb-6 p-4 sm:p-6 pr-32 md:pr-44 relative">
@@ -81,7 +79,7 @@
         </div>
       </div>
 
-      <!-- Keep a single badge in the corner (avoid double logo) -->
+      <!-- One small badge (avoid duplicate logos) -->
       <div class="absolute bottom-3 right-3 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/90">
         SignaPay SouthEast
       </div>
@@ -89,7 +87,9 @@
 
     <!-- Stepper (kept horizontal on mobile) -->
     <nav id="stepper" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 mb-3">
-      <!-- JS populates pills -->
+      <div class="rounded-xl border px-3 py-2 border-blue-400 bg-blue-900 text-blue-100">1. Business type</div>
+      <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">2. Needs</div>
+      <div class="rounded-xl border px-3 py-2 border-slate-700 bg-slate-800 text-slate-400">3. Solutions</div>
     </nav>
 
     <!-- STEP 1: Business type -->
@@ -105,12 +105,19 @@
       </div>
     </section>
 
-    <!-- STEP 2: Needs (hidden until a business type is chosen) -->
+    <!-- STEP 2: Needs -->
     <section class="surface-3d px-4 md:px-6 py-5 mb-5">
-      <div class="mb-3">
+      <div class="mb-3 flex items-center justify-between gap-3">
         <h2 id="needsTitle" class="text-lg font-semibold">What does this business need?</h2>
+        <!-- Optional controls; JS guards if you remove them -->
+        <div class="flex flex-wrap gap-2">
+          <button id="selectAll" class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Select all</button>
+          <button id="clearAll"  class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Clear all</button>
+          <button id="backTo1"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">Back</button>
+          <button id="toStep3"   class="rounded-full border border-white/20 px-3 py-1.5 text-xs hover:border-cyan-300/50">See results</button>
+        </div>
       </div>
-      <div id="step2" class="">
+      <div id="step2">
         <div id="needsGrid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"></div>
       </div>
     </section>
@@ -123,12 +130,12 @@
           Adjust needs
         </button>
       </div>
-      <div id="step3" class="">
+      <div id="step3">
         <div id="solutionsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
       </div>
     </section>
 
-    <!-- Special blocks (if your app uses them) -->
+    <!-- Special blocks -->
     <section id="specialBlocksSection" class="surface-3d px-4 md:px-6 py-5 mb-6 hidden">
       <h3 class="text-base font-semibold mb-3">Additional Information</h3>
       <div id="specialBlocksList" class="grid grid-cols-1 gap-3"></div>
@@ -169,7 +176,7 @@
       </div>
     </div>
 
-    <!-- (Optional) subtle helper prompt area your app references -->
+    <!-- (Optional) helper prompt area your app writes into -->
     <div id="categoryPrompt" class="sr-only"><span id="promptText"></span></div>
 
     <!-- Bootstrapping: version-aware loader for app.js and solutions.json -->
